@@ -1,0 +1,34 @@
+# ==============================================================================
+# AI Agent & Skills Configuration
+# ==============================================================================
+# Local testing plans and intermediate AI memory
+.local/
+tmp/
+/tmp
+
+# Local configurations or machine-specific overrides
+*.local.md
+CLAUDE.local.md
+
+# Runtime agent workspaces (evaluation and benchmark outputs)
+*-workspace/
+workspace/
+
+# ==============================================================================
+# Environment Secrets & API Keys
+# ==============================================================================
+.env
+.env*.local
+
+# ==============================================================================
+# System & Package Manager Defaults
+# ==============================================================================
+# Node / Vercel CLI (Common for tools like skills.sh)
+node_modules/
+.vercel/
+dist/
+bin/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
