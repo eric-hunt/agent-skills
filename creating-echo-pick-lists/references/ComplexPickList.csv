@@ -1,0 +1,7 @@
+﻿Source Plate Barcode,Source Plate Type,Source Well,Destination Plate,Destination Well,Transfer Volume,Description
+SRC-10001,384LDV_AQ_GP,A1,DST-20001,A1,50,Source well A1 copied to destination well A1
+SRC-10002,384LDV_AQ_GP,B1:B5,DST-20001,P2:P6,500,Source well copied from region B1:B5 to destination well P2:P6
+SRC-10002,384LDV_AQ_GP,{A1:P1},DST-20001,A2,25,Source well region {A1:P1} contains identical well content that will be transferred from one of those wells to destination well A2
+SRC-10003,384LDV_AQ_GP,{A1;A2;A7;A8},DST-20001,A3,250,Discrete Source wells {A1;A2;A7;A8} contain identical well content that will be transferred from one of those wells to destination well A3
+SRC-10002,384PP_AQ_GP2,{A1;A2;B6:B16},DST-20001,A4,25,Discrete Source wells {A1;A2} plus source region {B6:B16} contain identical well content that will be transferred from one of those wells to destination well A4
+SRC-10001,384LDV_AQ_GP,{C1:C6;K12:K18},DST-20001,A5,500,Source well regions {C1:C6} and {K12:K18} contain identical well content that will be transferred from one of those wells to destination well A5

@@ -1,0 +1,5 @@
+Source Plate Barcode,Source Well,Destination Well,Transfer Volume
+Ctrl1,A1,A1,50
+Ctrl1,A2,A24,100
+Ctrl1,A3,P1,150
+Ctrl1,A4,P24,200
