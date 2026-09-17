@@ -70,6 +70,41 @@ docstrings, and the claims the commit messages themselves make. Note the
 absence in the report — an undocumented architecture is a finding, not a
 blocker.
 
+## Step 3 — Pick a depth
+
+Every depth runs Part 1 and all five tension checks. What changes is the
+**radius** — this range, or the whole project — and whether the architecture
+itself is on the table. **Depth is never permission to look less carefully.**
+A check run shallowly and reported clean is the one failure this review
+cannot survive.
+
+Read the signals in this order; an explicit ask beats project maturity:
+
+| Signal | Depth |
+| --- | --- |
+| "be critical", "challenge this", "I am not sure this design is right", or the user questioning a choice they made earlier | **3 — foundations** |
+| The intent document is younger than the code it describes, or this is among the first phases to land against it | **3 — foundations** |
+| The phase strained against a stated rule — a workaround, a special case, a "fix this later" | **2 — decisions** |
+| Several phases have landed cleanly and the ask is routine: "run the review, draft the PR if nothing comes up" | **1 — drift** |
+
+Depth **2** is the default when nothing points elsewhere. Where signals
+disagree, take the deeper one and say why in the report header. State the
+depth you chose at the top of the report so the user can send you back down
+or up.
+
+| | **1 — drift** | **2 — decisions** | **3 — foundations** |
+| --- | --- | --- | --- |
+| Part 1 | inferred decisions in the range | + which of them belong in the docs | + which of them contradict a stated rule |
+| 2a prose vs code | claims touched in the range | every claim the phase relies on | + whether the claim was ever true |
+| 2b escalation | intent docs in the range | project-wide | project-wide, and is each seam real |
+| 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
+| 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
+| 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
+| Part 3 | skip | only where the phase strained a rule | required |
+
+At depth 1 the architecture is settled: report drift against it, do not
+relitigate it. At depth 3 the architecture is the subject.
+
 ## Part 1 — Decisions made without asking
 
 Read the commit messages and the diff of every prose file in the range. For
@@ -178,10 +213,58 @@ four, which apply everywhere and are the ones that pay off most often:
   produces a plausible-looking wrong answer rather than a loud failure, it is
   a trap. A bad value must not look like a good one.
 
+## Part 3 — The counterfactual pass
+
+*Depth 3 always; depth 2 only where the phase visibly strained against a rule.
+Skip at depth 1.*
+
+An architecture document written before the code existed is a prediction. This
+pass makes each prediction the phase strained against re-earn its place. The
+goal is not to drop rules — it is to stop paying for one nobody would write
+today.
+
+For each strained rule:
+
+1. **The rule**, quoted, and where it is written.
+2. **The friction** — what the phase had to do to honour it, cited
+   `file:line`. Without this, there is nothing to weigh.
+3. **The project without it** — concretely. Which code disappears, which
+   concepts stop needing names, what the public surface becomes.
+4. **What the rule buys** — the specific failure it prevents. If you cannot
+   name one that has happened or would plausibly happen, *that is the
+   finding.*
+5. **Recommendation** — keep, narrow to the case that motivated it, or drop.
+
+Rules for this pass:
+
+- **Argue the deviation, then argue back.** A counterfactual that only lists
+  benefits is advocacy wearing a review's clothes.
+- **A rule with a scar behind it is not a rule with a reason behind it.**
+  Check the history before proposing a drop:
+
+  ```bash
+  git log -S'<distinctive phrase from the rule>' -- <intent doc>
+  ```
+
+  A rule added in the same commit as a bug fix is expensive to undo, and the
+  commit message usually says why.
+- **Do not re-propose what the user already rejected.** If the history shows
+  this deviation was considered and declined, report that instead — the
+  finding is that the friction is still here, not that the decision was wrong.
+- **Three at most.** If more than three rules are straining, the finding is
+  the document, not the rules. Say that and stop.
+
+**If the project has no intent document**, invert the pass: state the
+architecture the code actually implements — three to five rules, each cited —
+and ask the user to confirm or correct it. That is the same conversation
+entered from the other end, and at depth 3 it is usually the more valuable
+one.
+
 ## Report format
 
 ```markdown
 ## Phase review: <name>   <base>..<head>, N commits
+_Depth N — <the signal that chose it>_
 
 ### Decisions made without asking
 (inferred) <claim>  -> <file:line>
@@ -191,6 +274,11 @@ four, which apply everywhere and are the ones that pay off most often:
 **<one-line finding>** — <what is wrong, and the evidence>
   <file:line>. Suggested: <the smallest change that resolves it>
 ...
+
+### Counterfactual   <!-- depth 2-3 only -->
+**<rule>** — friction at <file:line>. Without it: <what changes>.
+  It buys: <the failure prevented, or "nothing I can name">.
+  Recommend: keep / narrow / drop.
 
 ### Clean
 <checks that found nothing, one line — so the absence is informative>
