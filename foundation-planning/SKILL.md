@@ -36,7 +36,10 @@ Two rules about the tiers themselves:
 
 - **`in question` is the default.** A rule reaches `foundational` by argument,
   not by being written down. If you are unsure, it is `in question` — and say
-  so to the user rather than quietly promoting it.
+  so to the user rather than quietly promoting it. A *review* reading an
+  unmarked rule does the opposite and assumes `foundational`, because it
+  cannot tell a scar from a habit. The asymmetry is deliberate: be honest
+  when writing, conservative when reading.
 - **A tier is a claim about *confidence*, not importance.** A `contract` can
   matter every day. A `foundational` rule can sit untouched for months.
 
