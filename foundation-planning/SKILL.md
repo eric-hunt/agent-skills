@@ -164,17 +164,72 @@ Flag explicitly:
 ## Step 3 — Write the documents
 
 Only after the user has been through the list. Prefer the project's existing
-files; create new ones only when there is nowhere for something to live.
+files; create a new one only when there is nowhere for something to live.
 
-| Content | Where |
-| --- | --- |
-| The rules, their tiers, and their reasoning | `docs/ARCHITECTURE.md` |
-| How to work in this repo — conventions, commands, the working agreement | the agent instruction file (`AGENTS.md` / `CLAUDE.md`) |
-| A decision with a date and alternatives considered | `docs/adr/NNNN-*.md`, if the project uses ADRs |
-| Known defects and their measurements | `docs/DEFECTS.md` |
+### Start with three
 
-The agent instruction file should **point at** the architecture document, not
-restate it. Two copies of a rule are two rules, and they will disagree.
+| Document | Answers | Tiered? |
+| --- | --- | --- |
+| `README.md` | What is this, and how do I use it? | No — the audience is outside the project |
+| `docs/ARCHITECTURE.md` | Why is it built this way, and how firmly? | **Yes. This is the tiered document.** |
+| `AGENTS.md` / `CLAUDE.md` | How do I work in this repo? | No — commands, conventions, the working agreement |
+
+Three is enough to start, and the split between them is by **reader and
+question**, not by topic. The agent instruction file *points at* the
+architecture document; it never restates a rule from it. Two copies of a rule
+are two rules, and they will disagree — silently, and usually at the moment
+someone is relying on one of them.
+
+### Split further on evidence, not up front
+
+Five thin documents on day one are worse than one honest one: nobody knows
+which to open, and the empty ones read as negligence. Split a section out
+when it earns it.
+
+| Signal in an existing document | Split out to | Because |
+| --- | --- | --- |
+| The section is touched by most PRs while the rest sits still | `docs/DEFECTS.md`, `docs/ROADMAP.md` | Churn — see below |
+| The section is a procedure followed during one activity, not a rule checked against | `docs/TESTING.md`, `docs/RELEASING.md` | Procedures are followed start to finish; rules are checked one at a time. Mixing them makes both harder to use |
+| The section is a fact about the outside world, not a decision the project made | `docs/UNITS.md`, `docs/VENDOR-DOCS.md` | A fact is verified against a source, never tiered. Keeping facts in the tiered document invites tiering things that were never ours to decide |
+| The section is about tooling or environment, not the program | `docs/DEV-SETUP.md`, `docs/GIT-LFS.md` | Read once at setup, then never again. It should not compete for attention with rules read every phase |
+| Any one document runs past roughly 300 lines | whichever of the above fits | Past that, people stop re-reading and start grepping, and a rule found by grep is read without its reasoning |
+
+**Churn is the most important of these and the least obvious.** A document
+whose diff means something is a document you do not have to re-read. If the
+defect list lives inside `ARCHITECTURE.md`, every defect fix touches
+`ARCHITECTURE.md`, `git log docs/ARCHITECTURE.md` stops telling you when the
+architecture changed, and the cheapest signal a phase-boundary review has —
+*did the intent document move when the behaviour did?* — is destroyed.
+Splitting churn out is what keeps that signal alive.
+
+An ADR directory (`docs/adr/NNNN-*.md`) is worth adding only if the project
+will actually keep one. A dated decision with its alternatives is excellent;
+three ADRs and then silence is worse than none, because it implies the
+undocumented decisions were not decisions.
+
+### Give every document a first line
+
+Each one opens with a single line saying when to read it and where the rules
+live:
+
+```markdown
+# Testing
+
+_Read when writing or fixing a test. What the code **must** do is in
+[ARCHITECTURE.md](ARCHITECTURE.md); this is how we check it._
+```
+
+That line is what makes a five-document `docs/` navigable, and it is the
+thing that stops the architecture document slowly absorbing everything else.
+
+### Anti-patterns
+
+- **A document per source module.** It mirrors the code, so it goes stale
+  invisibly, and it answers no question anyone actually has.
+- **An index document.** If you need a document to find the documents, the
+  README and the agent file are not doing their job.
+- **A document nobody is required to read.** Either something sends the
+  reader there at a known moment, or it is a diary.
 
 ### Rule format
 
