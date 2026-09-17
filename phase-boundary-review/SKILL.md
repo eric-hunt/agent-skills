@@ -150,6 +150,7 @@ user can send you up or down in one word.
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
 | Part 3 | skip | only where the phase strained a rule | required |
+| Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
 
 At depth 1 the architecture is settled: report drift against it, do not
 relitigate it. At depth 3 the architecture is the subject.
@@ -312,6 +313,7 @@ markings exist, they override your own judgement about what is open:
 | --- | --- |
 | `foundational` | Load-bearing — changing it changes what the project is. Report friction against it always; propose dropping it only when the user explicitly asked you to be critical of the foundations. |
 | `in question` | Written to get moving, never earned. **These are the first targets at depth 3** — the project has already said it expects to revisit them. |
+| *anything this phase strained against* | Whatever its tier, it is also a Part 4 demotion candidate. A rule you have to work around is not the tier it claims. |
 | `contract` | A loose agreement kept for consistency. Drift against it is a finding; the rule itself is not interesting. Do not cost out a deviation from one. |
 
 An **unmarked** rule defaults to `foundational`. There is no recorded
@@ -323,6 +325,57 @@ architecture the code actually implements — three to five rules, each cited �
 and ask the user to confirm or correct it. That is the same conversation
 entered from the other end, and at depth 3 it is usually the more valuable
 one.
+
+## Part 4 — Tier drift
+
+*Every depth, including depth 1.* This is the one architecture-touching pass
+that is safe on a routine review, because it does not reopen a decision — it
+records what the last N phases already demonstrated about one. Skip it only
+when the project does not tier its rules.
+
+A tier is a claim about confidence, and confidence is exactly what a phase of
+work produces. A rule that three phases have leaned on without complaint is
+no longer `in question`; a `foundational` rule that this phase had to route
+around was never load-bearing in the way it claimed. **Say so.** Nobody goes
+back to re-tier rules on a quiet afternoon, so if this review does not raise
+it, the tiers freeze at the moment of least information.
+
+### Promote
+
+| What you saw | Suggest |
+| --- | --- |
+| An `in question` rule the phase relied on repeatedly with no friction | → `foundational` |
+| A rule that now has an example that goes red, where it had none before | → `foundational` |
+| An `in question` rule that other rules have come to depend on — it cannot be dropped now without touching them | → `foundational`, and say which rules pinned it |
+| A `contract` the code actually enforces | → `foundational`, or stop enforcing it |
+
+### Demote
+
+| What you saw | Suggest |
+| --- | --- |
+| A `foundational` rule this phase worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
+| A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract` |
+| A rule whose stated failure has never happened and which you cannot construct a case for | → `in question` |
+| A `foundational` rule nothing in the range could have violated | → probably `contract`; it is describing style, not constraining behaviour |
+
+Report each as one line, in the user's own terms — the tier was their call,
+so the finding is evidence, not a verdict:
+
+```
+promote  "Units convert at the boundary"  in question -> foundational
+         3 phases relied on it; test-units.R:40 now goes red when violated
+demote   "One well-address formatter"     foundational -> in question
+         this phase added a second path at wells.R:210 rather than extend it
+```
+
+Two constraints:
+
+- **A demotion is not a criticism of the rule.** It usually means the rule was
+  written before anyone knew what it would cost, which is the normal case and
+  the reason tiers exist at all.
+- **Do not promote on survival alone.** A rule nothing has tested has not
+  earned anything; it has merely not been in the way. Cite the phases that
+  leaned on it, or leave the tier where it is.
 
 ## Report format
 
@@ -343,6 +396,12 @@ _Depth N — <the signal that chose it>_
 **<rule>** — friction at <file:line>. Without it: <what changes>.
   It buys: <the failure prevented, or "nothing I can name">.
   Recommend: keep / narrow / drop.
+
+### Tier drift
+promote  "<rule>"  <from> -> <to>
+         <the evidence from this phase>
+demote   "<rule>"  <from> -> <to>
+         <the evidence from this phase>
 
 ### Clean
 <checks that found nothing, one line — so the absence is informative>
