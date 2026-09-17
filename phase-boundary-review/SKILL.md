@@ -1,6 +1,6 @@
 ---
 name: phase-boundary-review
-description: Review a completed phase of work before it merges — inventory the decisions made without asking, and find where the design acquired tension. Use at the end of a phase or refactor, before opening a PR, or when asked to review what a stretch of work decided rather than what it changed.
+description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report and changes nothing.
 metadata:
   author: Eric Hunt
   version: "1.0"
@@ -21,6 +21,25 @@ This review is that chance.
 
 **Output a short report. Twenty reviewable lines beat a seven-hundred-line
 document — the long document is how the problem started.**
+
+## This review changes nothing
+
+Read-only from start to finish: no edits, no fixes, no commits, no PR. The
+deliverable is a report and the conversation that follows it. If a planning
+mode is available, run the review inside it; if not, hold the same discipline
+by hand.
+
+Two reasons this matters more here than in an ordinary review:
+
+- **A review that fixes things on the way through is a review nobody can
+  audit.** Finding and fix arrive fused, and the user never gets the choice
+  this review exists to give them.
+- **Half the findings are about prose, and prose is cheap to rewrite.**
+  Editing a sentence so it matches the code resolves the symptom and destroys
+  the evidence — the mismatch *was* the signal that a decision went
+  unreviewed.
+
+Fixes come after the user has read the report and said which ones to make.
 
 ## Step 1 — Scope the range
 
@@ -282,10 +301,37 @@ _Depth N — <the signal that chose it>_
 
 ### Clean
 <checks that found nothing, one line — so the absence is informative>
+
+### Decide these
+1. <the question, the two options, and your recommendation>
+...
 ```
 
 Rank tension findings by what they cost if left: a wrong model taught to
 future readers outranks a stale sentence.
+
+## After the report
+
+Findings are not a to-do list. `Decide these` is the part the user reads
+first, so it holds only what actually needs them — not every finding, just
+the ones where you should not be the one to pick. Each is a question with its
+options and your recommendation, so the user can answer it in a word.
+
+Three is a lot. If the list is longer, the phase needed this review sooner.
+
+### If the user asked for a PR when nothing comes up
+
+Honour that charge — but "nothing comes up" means nothing reached the
+*decide* bar, not that the review found zero things. A stale sentence you can
+cite, with an obvious fix, is not a reason to stop.
+
+- **Nothing to decide** — say so in one line, then draft the PR. Put the
+  inferred-decisions list in the PR description; that is where a reviewer
+  will actually read it.
+- **Something to decide** — stop at the report. Say plainly that the PR is
+  held, and on what.
+
+A PR opened over an unanswered question buries the question.
 
 ## What this review is not
 
@@ -294,5 +340,7 @@ future readers outranks a stale sentence.
 - **Not a rubber stamp.** "No tension found" across five checks on a real phase
   usually means the checks were run shallowly. Say which checks were shallow
   rather than reporting clean.
-- **Not license to refactor.** Report, then let the user choose. A review that
-  fixes things on the way through is a review nobody can audit.
+- **Not license to refactor.** Report, then let the user choose — see
+  *This review changes nothing*.
+- **Not a plan.** It surfaces what needs deciding; it does not decide, and it
+  does not sequence the work that follows.
