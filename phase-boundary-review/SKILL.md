@@ -70,7 +70,9 @@ You are looking for three things, wherever they live:
 - **The intent documents** — architecture notes, ADRs, design docs, the agent
   instruction file, the README's "how this works" section.
 - **The invariant list** — prohibitions, "never do X", standing rules. Often a
-  numbered list inside one of the above.
+  numbered list inside one of the above. If the project marks its rules by
+  tier — `foundational`, `in question`, `contract` — that marking decides what
+  is open for challenge; see *Part 3*.
 - **The public surface** — what the project promises the outside world:
 
   | Project shape | Diff this |
@@ -97,19 +99,47 @@ itself is on the table. **Depth is never permission to look less carefully.**
 A check run shallowly and reported clean is the one failure this review
 cannot survive.
 
-Read the signals in this order; an explicit ask beats project maturity:
+Depth is chosen in two moves: **the range sets a floor, and the user
+promotes.** Maturity alone never reaches depth 3.
 
-| Signal | Depth |
+### The floor — read the range
+
+| What the range shows | Floor |
 | --- | --- |
-| "be critical", "challenge this", "I am not sure this design is right", or the user questioning a choice they made earlier | **3 — foundations** |
-| The intent document is younger than the code it describes, or this is among the first phases to land against it | **3 — foundations** |
+| The intent document was updated in this range alongside the code it describes, several phases have landed cleanly, and the ask is routine — "run the review, draft the PR if nothing comes up" | **1 — drift** |
+| The intent document was *not* touched in this range while the behaviour it describes changed | **2 — decisions** |
 | The phase strained against a stated rule — a workaround, a special case, a "fix this later" | **2 — decisions** |
-| Several phases have landed cleanly and the ask is routine: "run the review, draft the PR if nothing comes up" | **1 — drift** |
+| Nothing points anywhere | **2 — decisions** |
 
-Depth **2** is the default when nothing points elsewhere. Where signals
-disagree, take the deeper one and say why in the report header. State the
-depth you chose at the top of the report so the user can send you back down
-or up.
+The untouched-document case is worth checking mechanically. It is the
+cheapest signal in the review and it is almost always right:
+
+```bash
+git diff --name-only <base>..HEAD -- <intent docs>
+```
+
+A range that changed behaviour without touching the document describing that
+behaviour has very likely moved the code out from under the prose. Empty
+output here is not a clean bill — it is the reason to run check 2a properly
+rather than skimming it.
+
+### The promotion — read the user
+
+**Depth 3 is never inferred from the repository.** It needs a person asking
+for it:
+
+- "be critical", "challenge this", "push back on this"
+- the user questioning a design choice they made themselves
+- the user asking what a rule is costing, or whether it should exist at all
+
+A document younger than the code *plus* a critical ask is the case depth 3
+was built for: the foundations are probably wrong **and** the user is ready
+to hear it. A young document on its own stays at depth 2 — unproven
+foundations are a reason to check drift carefully, not a licence to reopen
+them unasked.
+
+State the depth and the signal that chose it at the top of the report, so the
+user can send you up or down in one word.
 
 | | **1 — drift** | **2 — decisions** | **3 — foundations** |
 | --- | --- | --- | --- |
@@ -272,6 +302,21 @@ Rules for this pass:
   finding is that the friction is still here, not that the decision was wrong.
 - **Three at most.** If more than three rules are straining, the finding is
   the document, not the rules. Say that and stop.
+
+### When the rules are tiered
+
+A project whose groundwork was laid deliberately marks each rule. Where those
+markings exist, they override your own judgement about what is open:
+
+| Tier | What this pass does with it |
+| --- | --- |
+| `foundational` | Load-bearing — changing it changes what the project is. Report friction against it always; propose dropping it only when the user explicitly asked you to be critical of the foundations. |
+| `in question` | Written to get moving, never earned. **These are the first targets at depth 3** — the project has already said it expects to revisit them. |
+| `contract` | A loose agreement kept for consistency. Drift against it is a finding; the rule itself is not interesting. Do not cost out a deviation from one. |
+
+An **unmarked** rule defaults to `foundational`. There is no recorded
+reasoning behind it, so you cannot tell a scar from a habit — check the
+history before treating it as open.
 
 **If the project has no intent document**, invert the pass: state the
 architecture the code actually implements — three to five rules, each cited —
