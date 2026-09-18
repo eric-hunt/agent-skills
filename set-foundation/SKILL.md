@@ -1,0 +1,347 @@
+---
+name: set-foundation
+description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
+metadata:
+  author: Eric Hunt
+  version: "1.0"
+license: MIT
+---
+
+# Set the foundation
+
+Most architecture documents fail the same way: every sentence in them reads
+as equally authoritative. A rule fought for over two days and a placeholder
+typed to stop thinking about it look identical on the page, so the next
+reader — human or agent — defends both with the same energy, and the project
+pays complexity rent on decisions nobody actually made.
+
+**The deliverable of this skill is the tier, not the prose.** A one-line rule
+marked `in question` is worth more than a well-argued page that does not say
+how firmly it is meant.
+
+Run this in a planning mode. It is a conversation that ends in documents, not
+a document-generating pass.
+
+## The tiers
+
+Every rule you write gets exactly one:
+
+| Tier | Means | The test | Cost of getting it wrong |
+| --- | --- | --- | --- |
+| `foundational` | Load-bearing. Changing it changes what the project *is*. | Can you name the failure it prevents, and has that failure happened or would it plausibly happen? | Marked too freely, everything is foundational and the tier stops carrying information. |
+| `in question` | Written to get moving. Plausible, never earned. | Would you be relieved or annoyed if someone showed you a simpler design without it? | The honest default. Under-using this is the failure mode this skill exists to fix. |
+| `contract` | A loose agreement kept for consistency — naming, layout, formatting. | Would a violation be *wrong*, or just *inconsistent*? | Cheap either way; these exist so they stop competing for attention with the real rules. |
+
+Two rules about the tiers themselves:
+
+- **`in question` is the default.** A rule reaches `foundational` by argument,
+  not by being written down. If you are unsure, it is `in question` — and say
+  so to the user rather than quietly promoting it. A *review* reading an
+  unmarked rule does the opposite and assumes `foundational`, because it
+  cannot tell a scar from a habit. The asymmetry is deliberate: be honest
+  when writing, conservative when reading.
+- **A tier is a claim about *confidence*, not importance.** A `contract` can
+  matter every day. A `foundational` rule can sit untouched for months.
+
+## Step 1 — Which mode
+
+```bash
+git log --oneline | wc -l
+ls AGENTS.md CLAUDE.md README* 2>/dev/null
+ls docs/ doc/ adr/ design/ 2>/dev/null
+```
+
+- **Greenfield** — little or no code, no intent documents. Go to Mode A.
+- **Running project** — code exists, documents are absent, thin, or not
+  trusted. Go to Mode B. This is the more common case and the more valuable
+  one.
+
+A project with *good* documents that merely lack tiers is Mode B with the
+reading already done: skip to Step 3 and tier what is there.
+
+## Mode A — Greenfield
+
+There is no code to read, so everything comes from the user. The risk here is
+the opposite of Mode B's: it is very easy to produce twenty confident rules
+about a program nobody has written.
+
+Ask about, in this order:
+
+1. **What the program is for**, in one sentence, and who is harmed when it is
+   wrong. Rules that do not trace back to this are decoration.
+2. **The shape of the data or domain** — the two or three nouns everything
+   else is expressed in terms of.
+3. **What must never happen.** These are the only real candidates for
+   `foundational` at this stage, because each names a failure.
+4. **What is already decided and why** — language, storage, deployment. Most
+   of these are `contract`; some are `foundational` and the user knows which.
+
+Then write **the fewest rules that would let someone else start**. Five to
+eight. Mark almost all of them `in question`, and say so plainly: *these are
+predictions, and the first phase against them is where they get tested.*
+That sentence is what makes the first boundary review honest.
+
+**Do not write rules about code that does not exist yet.** A rule with no
+code to constrain cannot be violated, cannot be tested, and will be obeyed by
+accident until the day it is inconvenient.
+
+## Mode B — Recover the architecture the code implements
+
+The project already has an architecture. It is just not written down, and
+what *is* written down may describe a different program. Your job is to read
+the first, compare it to the second, and put the difference to the user.
+
+### B1. Find what the code actually enforces
+
+A project's real invariants are the ones it defends. Start mechanically:
+
+```bash
+# guards, assertions, validators — the rules with teeth
+grep -rnE 'assert|stopifnot|match\.arg|raise |panic!|throw new|abort\(' <source dirs>
+
+# the prose the code carries about itself
+grep -rniE '\b(must|never|always|invariant|do not|cannot|required)\b' <source dirs>
+
+# the shapes that repeat — recurring commit scopes name the project's parts
+git log --format='%s' | sed 's/:.*//' | sort | uniq -c | sort -rn | head -20
+```
+
+Then read the public surface and the tests. **A rule with a test that goes
+red is a rule the project means.** A rule appearing only in a comment is a
+preference.
+
+### B2. Find the gap in both directions
+
+This is the step that makes Mode B worth running on a project that already
+has documents:
+
+- **Enforced but unstated** — the code defends it, nothing says so. These are
+  usually `foundational` and are the highest-value thing you will write. They
+  are also what a new contributor breaks first.
+- **Stated but unenforced** — a document says it, nothing goes red when it is
+  violated. *A prohibition with no failing example is a wish.* Either it needs
+  an example or it needs demoting to `contract` — put both options to the
+  user.
+- **Stated and contradicted** — the document says one thing, the code does
+  another. Report the code's version; it is the one that ships.
+
+### B3. Do not invent
+
+**Every rule you propose in Mode B cites `file:line`.** If you cannot cite
+it, it is not this project's architecture — it is your taste, and proposing
+it here launders an opinion into a foundation.
+
+Where you believe the code *should* have a rule it does not, that is a
+separate list, offered after the recovered ones and labelled as a suggestion.
+
+## Step 2 — Put it to the user before writing anything
+
+Do not hand over forty rules to be tiered. That is the seven-hundred-line
+document problem again, wearing a different hat.
+
+Bring **at most ten**, grouped, each on one line with a proposed tier and the
+evidence:
+
+```
+foundational  Well addresses are formatted in exactly one place
+              -> wells.R:44, enforced; test-wells.R:112 goes red
+in question   Units are converted at the boundary, never inside
+              -> only two call sites; the third would be awkward
+contract      Exported functions are verb_noun
+              -> 14 of 16 conform
+```
+
+Ask the user to **correct**, not to author. "Which of these is wrong?" gets
+answers; "what are your architectural principles?" gets silence or a lecture.
+
+Flag explicitly:
+
+- Any rule you moved to `foundational` on your own judgement.
+- Any `in question` rule the user seems to treat as settled — that mismatch
+  is the whole point of the exercise.
+- Anything you found enforced that the user did not know was enforced.
+
+## Step 3 — Write the documents
+
+Only after the user has been through the list. Prefer the project's existing
+files; create a new one only when there is nowhere for something to live.
+
+### Start with three
+
+| Document | Answers | Tiered? |
+| --- | --- | --- |
+| `README.md` | What is this, and how do I use it? | No — the audience is outside the project |
+| `docs/ARCHITECTURE.md` | Why is it built this way, and how firmly? | **Yes. This is the tiered document.** |
+| `AGENTS.md` / `CLAUDE.md` | How do I work in this repo? | No — commands, conventions, the working agreement |
+
+Three is enough to start, and the split between them is by **reader and
+question**, not by topic. The agent instruction file *points at* the
+architecture document; it never restates a rule from it. Two copies of a rule
+are two rules, and they will disagree — silently, and usually at the moment
+someone is relying on one of them.
+
+### Split further on evidence, not up front
+
+Five thin documents on day one are worse than one honest one: nobody knows
+which to open, and the empty ones read as negligence. Split a section out
+when it earns it.
+
+| Signal in an existing document | Split out to | Because |
+| --- | --- | --- |
+| The section is touched by most PRs while the rest sits still | `docs/DEFECTS.md`, `docs/ROADMAP.md` | Churn — see below |
+| The section is a procedure followed during one activity, not a rule checked against | `docs/TESTING.md`, `docs/RELEASING.md` | Procedures are followed start to finish; rules are checked one at a time. Mixing them makes both harder to use |
+| The section records something the project does not control and did not decide | one document per source — see below | A fact is verified against its source, never tiered. Keeping facts in the tiered document invites tiering things that were never ours to decide |
+| The section is about tooling or environment, not the program | `docs/DEV-SETUP.md`, `docs/GIT-LFS.md` | Read once at setup, then never again. It should not compete for attention with rules read every phase |
+| Any one document runs past roughly 300 lines | whichever of the above fits | Past that, people stop re-reading and start grepping, and a rule found by grep is read without its reasoning |
+
+**The "does not control" row generalises further than its examples.** Every
+project has some understanding it did not decide and cannot change: the shape
+of an API it calls, a vendor's published specification for a device or file
+format, how a unit or currency converts, what a standard or regulation
+requires, a protocol's wire format. These share three properties that make
+them the wrong shape for a tiered document — they are low-churn, they are
+verifiable against something outside the repository, and a tier applied to
+one would be a claim about someone else's decision. **Name the file after the
+source, not the topic** (`docs/STRIPE-API.md`, `docs/UNITS.md`,
+`docs/VENDOR-DOCS.md`), so that when the source changes it is obvious what
+has to be re-checked and what has not.
+
+**Churn is the most important of these and the least obvious.** A document
+whose diff means something is a document you do not have to re-read. If the
+defect list lives inside `ARCHITECTURE.md`, every defect fix touches
+`ARCHITECTURE.md`, `git log docs/ARCHITECTURE.md` stops telling you when the
+architecture changed, and the cheapest signal a boundary review has —
+*did the intent document move when the behaviour did?* — is destroyed.
+Splitting churn out is what keeps that signal alive.
+
+An ADR directory (`docs/adr/NNNN-*.md`) is worth adding only if the project
+will actually keep one. A dated decision with its alternatives is excellent;
+three ADRs and then silence is worse than none, because it implies the
+undocumented decisions were not decisions.
+
+### Give every document a first line
+
+Each one opens with a single line saying when to read it and where the rules
+live:
+
+```markdown
+# Testing
+
+_Read when writing or fixing a test. What the code **must** do is in
+[ARCHITECTURE.md](ARCHITECTURE.md); this is how we check it._
+```
+
+That line is what makes a five-document `docs/` navigable, and it is the
+thing that stops the architecture document slowly absorbing everything else.
+
+### Anti-patterns
+
+- **A document per source module.** It mirrors the code, so it goes stale
+  invisibly, and it answers no question anyone actually has.
+- **An index document.** If you need a document to find the documents, the
+  README and the agent file are not doing their job.
+- **A document nobody is required to read.** Either something sends the
+  reader there at a known moment, or it is a diary.
+
+### Rule format
+
+Each rule, so that a later review can find it and check it:
+
+```markdown
+### Well addresses are formatted in exactly one place
+
+`foundational` · (agreed 2026-09-17)
+
+Two formatters drift, and the drift shows up as a plate that loads into the
+wrong rows — a wrong answer that looks right.
+
+Enforced at `wells.R:44`. Goes red at `tests/test-wells.R:112`.
+```
+
+Four parts, all four load-bearing:
+
+1. **The rule**, one sentence, imperative, testable.
+2. **The tier**, plus provenance — `(agreed <date>)` when the user accepted
+   it, `(inferred)` when you decided it while implementing. An `(inferred)`
+   tag next to a `foundational` rule should be uncomfortable; that discomfort
+   is the mechanism.
+3. **The failure it prevents** — not a restatement of the rule. If the only
+   reason you can give is "consistency", the tier is `contract`.
+4. **Where it is enforced, and what goes red.** A `foundational` rule with no
+   failing example is the first thing to fix after this session.
+
+### Point the agent file at what happens next
+
+The rules are now written down, but nothing sends anyone to them. Close that
+gap here, while you have the user's attention, because it will not be reopened
+later: add short **pointer lines** to the agent instruction file naming the
+moments at which this project expects something to happen.
+
+The reason this belongs in that file and nowhere else: **the agent file is
+always loaded; a skill is loaded on demand.** Policy that has to be discovered
+before it applies is not policy. So *when* lives in the agent file, *how* stays
+in the skill, and neither repeats the other.
+
+```markdown
+## Working agreement
+
+Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Cite its
+reasoning so it can be judged; never cite it as the judgement.
+
+- **At a phase boundary, before opening a PR** — run `review-boundary`. It
+  reports; it changes nothing.
+- **When a rule's tier stops matching how the project treats it** — re-tier it
+  in `ARCHITECTURE.md`, with the date. The review will tell you when.
+- **When recording a defect** — `docs/DEFECTS.md`, never `ARCHITECTURE.md`. A
+  defect entry in the rules document destroys the cheapest signal a boundary
+  review has.
+```
+
+Five rules for writing them:
+
+1. **Name the moment, not the tool.** "At a phase boundary, before opening a
+   PR" is something a person recognises they are standing in. "Use
+   `review-boundary` for reviews" is a tautology and will never fire.
+2. **Point, never restate.** No depths, no steps, no trigger lists — those
+   live in the skill and will drift the moment it changes. One line is the
+   budget, and the budget is the safeguard.
+3. **Only for what the project actually has.** Do not write a pointer to a
+   skill or a document that is not installed. A dead pointer teaches the
+   reader that the pointers are decorative.
+4. **Keep the coupling one-directional.** The pointer names the skill; the
+   skill never names the project. Delete the pointer and the tiers still
+   stand on their own.
+5. **Put them to the user like everything else here.** These are operational
+   policy — they bind future sessions, so they are the user's call, not
+   yours.
+
+The third bullet in the example is worth writing even where no skill is
+involved: it is what makes the churn split self-enforcing, by telling the next
+contributor where a defect goes *before* they put it in the wrong file.
+
+## Step 4 — Hand off
+
+Say plainly which rules are now on probation:
+
+> N foundational, N in question, N contracts. The `in question` ones are
+> predictions — the first phase that strains against one should cost out the
+> deviation rather than work around it.
+
+`review-boundary` reads these tiers directly: it will report friction
+against a `foundational` rule but not propose dropping it unasked, will go
+after `in question` rules first when you ask for a critical review, and will
+not spend a counterfactual on a `contract`.
+
+## What this is not
+
+- **Not a design session.** You are recording what is decided and how firmly,
+  not deciding it. Where the user has not decided, the output is `in question`
+  — not your best guess promoted to prose.
+- **Not a documentation pass.** Docstrings, READMEs and API reference are a
+  different job. This produces rules with tiers.
+- **Not permanent.** A tier is a snapshot of confidence. Re-run this when the
+  `in question` list has stopped matching what the project actually treats as
+  negotiable.
+- **Not a licence to refactor.** If recovering the architecture turns up a
+  bug, report it and keep going. Fixing it here mixes a finding into a
+  foundation.
