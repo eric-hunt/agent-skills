@@ -270,6 +270,55 @@ Four parts, all four load-bearing:
 4. **Where it is enforced, and what goes red.** A `foundational` rule with no
    failing example is the first thing to fix after this session.
 
+### Point the agent file at what happens next
+
+The rules are now written down, but nothing sends anyone to them. Close that
+gap here, while you have the user's attention, because it will not be reopened
+later: add short **pointer lines** to the agent instruction file naming the
+moments at which this project expects something to happen.
+
+The reason this belongs in that file and nowhere else: **the agent file is
+always loaded; a skill is loaded on demand.** Policy that has to be discovered
+before it applies is not policy. So *when* lives in the agent file, *how* stays
+in the skill, and neither repeats the other.
+
+```markdown
+## Working agreement
+
+Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Cite its
+reasoning so it can be judged; never cite it as the judgement.
+
+- **At a phase boundary, before opening a PR** — run `review-boundary`. It
+  reports; it changes nothing.
+- **When a rule's tier stops matching how the project treats it** — re-tier it
+  in `ARCHITECTURE.md`, with the date. The review will tell you when.
+- **When recording a defect** — `docs/DEFECTS.md`, never `ARCHITECTURE.md`. A
+  defect entry in the rules document destroys the cheapest signal a boundary
+  review has.
+```
+
+Five rules for writing them:
+
+1. **Name the moment, not the tool.** "At a phase boundary, before opening a
+   PR" is something a person recognises they are standing in. "Use
+   `review-boundary` for reviews" is a tautology and will never fire.
+2. **Point, never restate.** No depths, no steps, no trigger lists — those
+   live in the skill and will drift the moment it changes. One line is the
+   budget, and the budget is the safeguard.
+3. **Only for what the project actually has.** Do not write a pointer to a
+   skill or a document that is not installed. A dead pointer teaches the
+   reader that the pointers are decorative.
+4. **Keep the coupling one-directional.** The pointer names the skill; the
+   skill never names the project. Delete the pointer and the tiers still
+   stand on their own.
+5. **Put them to the user like everything else here.** These are operational
+   policy — they bind future sessions, so they are the user's call, not
+   yours.
+
+The third bullet in the example is worth writing even where no skill is
+involved: it is what makes the churn split self-enforcing, by telling the next
+contributor where a defect goes *before* they put it in the wrong file.
+
 ## Step 4 — Hand off
 
 Say plainly which rules are now on probation:
