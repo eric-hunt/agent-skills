@@ -106,23 +106,41 @@ promotes.** Maturity alone never reaches depth 3.
 
 | What the range shows | Floor |
 | --- | --- |
-| The intent document was updated in this range alongside the code it describes, several phases have landed cleanly, and the ask is routine — "run the review, draft the PR if nothing comes up" | **1 — drift** |
-| The intent document was *not* touched in this range while the behaviour it describes changed | **2 — decisions** |
+| A **rule** in the intent document changed in this range alongside the code it governs, several phases have landed cleanly, and the ask is routine — "run the review, draft the PR if nothing comes up" | **1 — drift** |
+| The behaviour changed and no rule governing it moved | **2 — decisions** |
 | The phase strained against a stated rule — a workaround, a special case, a "fix this later" | **2 — decisions** |
 | Nothing points anywhere | **2 — decisions** |
 
-The untouched-document case is worth checking mechanically. It is the
-cheapest signal in the review and it is almost always right:
+This is the cheapest signal in the review, so check it mechanically:
 
 ```bash
-git diff --name-only <base>..HEAD -- <intent docs>
+git diff --name-only <base>..HEAD -- <intent docs>   # did it move at all?
+git diff           <base>..HEAD -- <intent docs>     # did it move for this reason?
 ```
 
 A range that changed behaviour without touching the document describing that
 behaviour has very likely moved the code out from under the prose. Empty
-output here is not a clean bill — it is the reason to run check 2a properly
-rather than skimming it.
+output is not a clean bill — it is the reason to run check 2a properly rather
+than skimming it.
 
+**A touch is not alignment, and the second command is why the first is not
+enough.** A defect noted, a roadmap item ticked, a typo fixed, a link
+repaired — each leaves the intent document changed and every rule in it
+exactly as it was. Read the hunks and ask which happened:
+
+- **A rule changed** — the design moved and the prose moved with it. This is
+  the depth-1 case.
+- **Something was appended near a rule** — a defect entry, a note, an
+  exception recorded under a rule that still claims to have no exceptions.
+  The document grew; the design it describes did not get revisited. Floor of
+  **2**, and this is precisely where 2a pays: the rule and the note beneath
+  it now disagree.
+- **Nothing load-bearing changed** — treat it as untouched.
+
+Where the project keeps its churn in separate documents, this reads itself:
+a range touching only `DEFECTS.md` has not touched a rule. Where everything
+lives in one file, you have to read the diff to find out — which is the cost
+of that layout, paid once per review.
 ### The promotion — read the user
 
 **Depth 3 is never inferred from the repository.** It needs a person asking
