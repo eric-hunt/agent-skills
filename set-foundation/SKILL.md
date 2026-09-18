@@ -1,13 +1,13 @@
 ---
-name: foundation-planning
-description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them.
+name: set-foundation
+description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
 metadata:
   author: Eric Hunt
   version: "1.0"
 license: MIT
 ---
 
-# Foundation planning
+# Set the foundation
 
 Most architecture documents fail the same way: every sentence in them reads
 as equally authoritative. A rule fought for over two days and a placeholder
@@ -79,7 +79,7 @@ Ask about, in this order:
 Then write **the fewest rules that would let someone else start**. Five to
 eight. Mark almost all of them `in question`, and say so plainly: *these are
 predictions, and the first phase against them is where they get tested.*
-That sentence is what makes the first phase-boundary review honest.
+That sentence is what makes the first boundary review honest.
 
 **Do not write rules about code that does not exist yet.** A rule with no
 code to constrain cannot be violated, cannot be tested, and will be obeyed by
@@ -210,7 +210,7 @@ has to be re-checked and what has not.
 whose diff means something is a document you do not have to re-read. If the
 defect list lives inside `ARCHITECTURE.md`, every defect fix touches
 `ARCHITECTURE.md`, `git log docs/ARCHITECTURE.md` stops telling you when the
-architecture changed, and the cheapest signal a phase-boundary review has —
+architecture changed, and the cheapest signal a boundary review has —
 *did the intent document move when the behaviour did?* — is destroyed.
 Splitting churn out is what keeps that signal alive.
 
@@ -278,7 +278,7 @@ Say plainly which rules are now on probation:
 > predictions — the first phase that strains against one should cost out the
 > deviation rather than work around it.
 
-`phase-boundary-review` reads these tiers directly: it will report friction
+`review-boundary` reads these tiers directly: it will report friction
 against a `foundational` rule but not propose dropping it unasked, will go
 after `in question` rules first when you ask for a critical review, and will
 not spend a counterfactual on a `contract`.

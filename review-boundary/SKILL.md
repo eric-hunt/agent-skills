@@ -1,13 +1,13 @@
 ---
-name: phase-boundary-review
-description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report and changes nothing.
+name: review-boundary
+description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report and changes nothing. Pairs with set-foundation, which lays down the tiered rules this review checks against.
 metadata:
   author: Eric Hunt
   version: "1.0"
 license: MIT
 ---
 
-# Phase boundary review
+# Review at a phase boundary
 
 A code review asks *is this correct*. This asks two different questions:
 
@@ -324,8 +324,9 @@ Rules for this pass:
 
 ### When the rules are tiered
 
-A project whose groundwork was laid deliberately marks each rule. Where those
-markings exist, they override your own judgement about what is open:
+A project whose groundwork was laid deliberately — by `set-foundation` or by
+hand — marks each rule. Where those markings exist, they override your own
+judgement about what is open:
 
 | Tier | What this pass does with it |
 | --- | --- |
