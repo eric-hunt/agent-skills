@@ -421,8 +421,8 @@ promote  "<rule>"  <from> -> <to>
 demote   "<rule>"  <from> -> <to>
          <the evidence from this phase>
 
-### Clean
-<checks that found nothing, one line — so the absence is informative>
+Clean    <check>: <what was examined, counted> ...
+Skipped  <check> — <why, usually the depth>
 
 ### Decide these
 1. <the question, the two options, and your recommendation>
@@ -431,6 +431,40 @@ demote   "<rule>"  <from> -> <to>
 
 Rank tension findings by what they cost if left: a wrong model taught to
 future readers outranks a stale sentence.
+
+### The clean block
+
+This block is **for the record, not for reading.** The user reads `Decide
+these`; this is the part that makes "nothing to decide" falsifiable. Keep it
+last, keep it short, and do not apologise for it — it should cost the reader
+four seconds to skip and cost you an explicit lie to fake.
+
+```
+Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, cited to source
+         2c: 3 invariants, each with a failing example
+         2d: NAMESPACE +2, both extend an existing verb
+         4:  no tier drift — nothing leaned on an `in question` rule
+Skipped  2b project-wide, Part 3 — depth 1
+```
+
+Two properties earn its keep, and both are about what the line is *made of*:
+
+- **Name the scope, never the verdict.** "4 claims in §Rounding, cited to
+  source" is something you can be caught not having done. "No drift found" is
+  not. Counts, not lists — the denominator is the load-bearing part, and it
+  is also what keeps the block from becoming a second report.
+- **`Skipped` is mandatory whenever anything was skipped.** The depth matrix
+  puts checks deliberately out of scope, and a check that was out of scope
+  must never read as a check that passed. A check that was *run shallowly*
+  belongs here too, with the word shallow and the reason — that is the
+  difference between an honest depth-1 review and a rubber stamp, and it is
+  the only place that difference can show.
+
+If this block runs longer than the findings above it, you have written a
+receipt rather than a review. Compress it. If there is genuinely nothing
+anywhere in the report but this block, say that in the first line — *"Nothing
+to decide; the record is below"* — so the user knows the whole report is four
+seconds long before they start reading it.
 
 ## After the report
 
