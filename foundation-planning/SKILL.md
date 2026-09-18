@@ -190,9 +190,21 @@ when it earns it.
 | --- | --- | --- |
 | The section is touched by most PRs while the rest sits still | `docs/DEFECTS.md`, `docs/ROADMAP.md` | Churn — see below |
 | The section is a procedure followed during one activity, not a rule checked against | `docs/TESTING.md`, `docs/RELEASING.md` | Procedures are followed start to finish; rules are checked one at a time. Mixing them makes both harder to use |
-| The section is a fact about the outside world, not a decision the project made | `docs/UNITS.md`, `docs/VENDOR-DOCS.md` | A fact is verified against a source, never tiered. Keeping facts in the tiered document invites tiering things that were never ours to decide |
+| The section records something the project does not control and did not decide | one document per source — see below | A fact is verified against its source, never tiered. Keeping facts in the tiered document invites tiering things that were never ours to decide |
 | The section is about tooling or environment, not the program | `docs/DEV-SETUP.md`, `docs/GIT-LFS.md` | Read once at setup, then never again. It should not compete for attention with rules read every phase |
 | Any one document runs past roughly 300 lines | whichever of the above fits | Past that, people stop re-reading and start grepping, and a rule found by grep is read without its reasoning |
+
+**The "does not control" row generalises further than its examples.** Every
+project has some understanding it did not decide and cannot change: the shape
+of an API it calls, a vendor's published specification for a device or file
+format, how a unit or currency converts, what a standard or regulation
+requires, a protocol's wire format. These share three properties that make
+them the wrong shape for a tiered document — they are low-churn, they are
+verifiable against something outside the repository, and a tier applied to
+one would be a claim about someone else's decision. **Name the file after the
+source, not the topic** (`docs/STRIPE-API.md`, `docs/UNITS.md`,
+`docs/VENDOR-DOCS.md`), so that when the source changes it is obvious what
+has to be re-checked and what has not.
 
 **Churn is the most important of these and the least obvious.** A document
 whose diff means something is a document you do not have to re-read. If the
