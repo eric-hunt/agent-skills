@@ -41,6 +41,20 @@ Two reasons this matters more here than in an ordinary review:
 
 Fixes come after the user has read the report and said which ones to make.
 
+**"Changes nothing" is about the project, not about your scratch space.** A
+real review needs somewhere to put working notes, grep output, and the report
+itself while it is being assembled. Nominate one gitignored path up front and
+say where it is:
+
+```bash
+git check-ignore -q temp/ && echo "temp/ is ignored"
+```
+
+Everything the review writes goes there and nowhere else. Saying so at the
+start also makes the deliverable concrete — a report the user can reread and
+diff against the next one, rather than a wall of conversation that scrolls
+away.
+
 ## Step 1 — Scope the range
 
 Establish what "this phase" means before reading anything:
@@ -109,6 +123,7 @@ promotes.** Maturity alone never reaches depth 3.
 | A **rule** in the intent document changed in this range alongside the code it governs, several phases have landed cleanly, and the ask is routine — "run the review, draft the PR if nothing comes up" | **1 — drift** |
 | The behaviour changed and no rule governing it moved | **2 — decisions** |
 | The phase strained against a stated rule — a workaround, a special case, a "fix this later" | **2 — decisions** |
+| The range **created or re-tiered the rules themselves** | **2 — decisions**, and say in the report that Part 4 is structurally thin |
 | Nothing points anywhere | **2 — decisions** |
 
 This is the cheapest signal in the review, so check it mechanically:
@@ -122,6 +137,13 @@ A range that changed behaviour without touching the document describing that
 behaviour has very likely moved the code out from under the prose. Empty
 output is not a clean bill — it is the reason to run check 2a properly rather
 than skimming it.
+
+**Watch for the circular range.** If the rules were written *by the commits
+under review*, the depth-1 row matches for the wrong reason: a rule changed
+alongside the code because the rule is new, not because the design was
+revisited. Nothing has yet had a chance to disagree with it. Take the floor of
+2, say so in the report, and expect Part 4 to find almost nothing — no prior
+phase can have leaned on a tier that did not exist.
 
 **A touch is not alignment, and the second command is why the first is not
 enough.** A defect noted, a roadmap item ticked, a typo fixed, a link
@@ -536,9 +558,12 @@ last, keep it short, and do not apologise for it — it should cost the reader
 four seconds to skip and cost you an explicit lie to fake.
 
 ```
-Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, cited to source
+Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
+             11 citations resolved, 3 wrong (see findings) — 27% rot
          2c: 3 invariants, each with a failing example
          2d: NAMESPACE +2, both extend an existing verb
+         2f: docs 4 files, largest 312 lines (>300 — flagged);
+             tiers 4/11 foundational
          4:  no tier drift — nothing leaned on an `in question` rule
 Skipped  2b project-wide, Part 3 — depth 1
 ```
@@ -564,12 +589,26 @@ seconds long before they start reading it.
 
 ## After the report
 
-Findings are not a to-do list. `Decide these` is the part the user reads
-first, so it holds only what actually needs them — not every finding, just
-the ones where you should not be the one to pick. Each is a question with its
-options and your recommendation, so the user can answer it in a word.
+Findings are not a to-do list. **Sort every finding into one of two piles,
+and make the sort the most visible thing the report does:**
 
-Three is a lot. If the list is longer, the phase needed this review sooner.
+- **Obvious fix, no decision needed.** You know what the right change is and
+  so will the user the moment they read it — a stale sentence, a wrong
+  citation, a missing test. These belong in the body and nowhere else. Do not
+  ask a question you already know the answer to; it costs the user the same
+  attention as a real one and teaches them the list is padded.
+- **Needs the user.** Two defensible options, or a cost only they can weigh.
+  These go in `Decide these`, each as a question with its options and your
+  recommendation, so it can be answered in a word.
+
+This sort is worth more than any single finding in the report. A review that
+produced thirteen findings and asked for three decisions has done the user's
+reading for them; one that hands over thirteen questions has just moved the
+work.
+
+Three decisions is a lot. If the list is longer, either the phase needed this
+review sooner, or you have not sorted hard enough — check the second before
+reporting the first.
 
 ### If the user asked for a PR when nothing comes up
 
