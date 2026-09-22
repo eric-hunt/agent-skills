@@ -1,0 +1,1 @@
+Reference for designing Echo 525 liquid handler methods and Echo Cherry Pick pick lists. Covers instrument transfer limits, source-plate/calibration selection by fluid composition (CMC, glycerol, protein), source-well selector notation (single, range, and pooled wells), and the four canonical pick list CSV formats (NextAvailableWell, Explicit, Controls, ComplexPickList).

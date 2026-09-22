@@ -4,6 +4,7 @@ description: Reference for designing Echo 525 liquid handler methods and Echo Ch
 metadata:
   author: Eric Hunt
   version: "1.0"
+  summary: Designing Echo 525 liquid handler methods and formatting Cherry Pick pick lists
 license: MIT
 ---
 

@@ -4,6 +4,7 @@ description: Read-only review of a completed phase of work before it merges — 
 metadata:
   author: Eric Hunt
   version: "1.0"
+  summary: Read-only review at a phase boundary: what was decided without asking, and where the design strained
 license: MIT
 ---
 
