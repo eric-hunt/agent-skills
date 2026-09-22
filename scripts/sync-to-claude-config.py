@@ -251,6 +251,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
     ap.add_argument("--no-pr", action="store_true", help="commit and push, but do not open a PR")
     ap.add_argument("--no-root-readme", action="store_true", help="leave the shared root table alone")
+    ap.add_argument("--prune", action="store_true",
+                    help="delete mirrored skills that no longer exist here (needed after a rename)")
     args = ap.parse_args()
 
     target = args.target.expanduser().resolve()
@@ -292,13 +294,14 @@ def main() -> int:
     for s in updated:
         print(f"  ~ {s['name']}")
     for name in removed:
-        print(f"  ! {name} exists in the mirror but not here — remove it by hand")
+        print(f"  - {name}" if args.prune
+              else f"  ! {name} is in the mirror but not here — pass --prune to delete it")
     if author_changed:
         print(f"  ~ skills/{AUTHOR}/README.md")
     for name in root_changed:
         print(f"  ~ README.md row: {name}")
 
-    if not (added or updated or author_changed or root_dirty):
+    if not (added or updated or author_changed or root_dirty or (removed and args.prune)):
         print("\nnothing to sync.")
         return 0
 
@@ -309,6 +312,9 @@ def main() -> int:
     require_clean_main(target)
     git(target, "checkout", "-b", args.branch)
 
+    if args.prune:
+        for name in removed:
+            shutil.rmtree(skills_dir / name)
     for s in added + updated:
         dst = skills_dir / s["name"]
         if dst.exists():
@@ -332,6 +338,8 @@ def main() -> int:
         body += "\nAdded: " + ", ".join(s["name"] for s in added)
     if updated:
         body += "\nUpdated: " + ", ".join(s["name"] for s in updated)
+    if removed and args.prune:
+        body += "\nRemoved: " + ", ".join(removed)
     body += "\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n"
 
     git(target, "add", "-A", "skills", "README.md")
@@ -355,6 +363,8 @@ def main() -> int:
         pr_body += "**Updated**\n" + "".join(
             f"- `{s['name']}` — {s['summary']}\n" for s in updated
         ) + "\n"
+    if removed and args.prune:
+        pr_body += "**Removed**\n" + "".join(f"- `{n}`\n" for n in removed) + "\n"
     pr_body += (
         "Opened by `scripts/sync-to-claude-config.py`. Send fixes to the source "
         "repo rather than here — edits made in this repo are overwritten on the "
