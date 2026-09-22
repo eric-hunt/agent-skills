@@ -1,5 +1,27 @@
 # Refinements for `review-boundary` and `set-foundation`
 
+> **Status: all six applied** (2026-09-22). Kept as the record of what the
+> first real trial found and why the skills changed, since the findings are
+> evidence and the commits are only the conclusion. Three changes were applied
+> differently from the proposal below:
+>
+> 1. **Citations are scoped by how long the artifact lives.** Symbol-based
+>    citation applies to documents written to outlive the session. The review
+>    report cites both symbol and line, because it is read against the commit
+>    range in its own heading, and the line saves the reader a search before it
+>    can rot.
+> 2. **Document health is one check, not two placements.** Size and tier
+>    distribution went into a new `2f` alongside dead pointers and orphan
+>    documents, rather than being split between Part 4 and the clean block.
+>    The general lesson below — that `set-foundation` states thresholds
+>    `review-boundary` never checks — is a category, and categories need a
+>    home or the next threshold gets scattered too.
+> 3. **The `agreed:` integrity rule is narrowed, not absolute.** "An agent
+>    cannot set this field" leaves nobody able to set it. The rule as written
+>    is that an agent may set it only in the session where the user accepted
+>    that wording, never retroactively and never from silence.
+
+
 _From the first real trial: `review-boundary` run over `pickr` `v0.4.0..v0.5.0`
 (2026-09-22), in a sub-agent with **no conversation history**, against tiers
 that `set-foundation` had laid down one phase earlier. Full report and a

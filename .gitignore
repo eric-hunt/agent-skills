@@ -13,6 +13,7 @@
 .local/
 tmp/
 /tmp
+temp/
 
 # Local configurations or machine-specific overrides
 *.local.md
