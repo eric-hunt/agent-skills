@@ -4,6 +4,7 @@ description: Lay down a project's groundwork documents — the architecture note
 metadata:
   author: Eric Hunt
   version: "1.0"
+  summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
 
