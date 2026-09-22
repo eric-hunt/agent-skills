@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import json
 import re
 import shutil
 import subprocess
@@ -34,6 +35,8 @@ from pathlib import Path
 SOURCE = Path(__file__).resolve().parent.parent
 DEFAULT_TARGET = Path.home() / "GitHub" / "claude-config"
 AUTHOR = "hunt"
+REPO = "nebiolabs/claude-config"
+BRANCH_PREFIX = f"chore/sync-{AUTHOR}-skills-"
 
 # Directories in this repo that are not skills.
 SKIP = {".git", ".remember", ".vscode", "docs", "scripts", "temp"}
@@ -226,6 +229,31 @@ def git(target: Path, *args: str, check: bool = True) -> str:
     return result.stdout.strip()
 
 
+def open_sync_pr(target: Path) -> str | None:
+    """URL of an already-open PR from a previous run, if there is one.
+
+    The change plan is computed against the target's `main`, so an unmerged
+    sync PR keeps showing up as pending work. Without this check a second run
+    opens a duplicate PR — noise in a repository other people watch. A gh
+    failure returns None rather than blocking: this is a guard, not a gate.
+    """
+    result = subprocess.run(
+        ["gh", "pr", "list", "--repo", REPO, "--state", "open",
+         "--json", "headRefName,url"],
+        cwd=target, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        prs = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError:
+        return None
+    return next(
+        (pr["url"] for pr in prs if pr["headRefName"].startswith(BRANCH_PREFIX)),
+        None,
+    )
+
+
 def require_clean_main(target: Path) -> None:
     branch = git(target, "branch", "--show-current")
     if branch != "main":
@@ -247,13 +275,18 @@ def require_clean_main(target: Path) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", type=Path, default=DEFAULT_TARGET)
-    ap.add_argument("--branch", default=f"chore/sync-{AUTHOR}-skills-{date.today()}")
+    ap.add_argument("--branch", default=None,
+                    help="branch name; passing one explicitly also overrides the "
+                         "open-PR guard")
     ap.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
     ap.add_argument("--no-pr", action="store_true", help="commit and push, but do not open a PR")
     ap.add_argument("--no-root-readme", action="store_true", help="leave the shared root table alone")
     ap.add_argument("--prune", action="store_true",
                     help="delete mirrored skills that no longer exist here (needed after a rename)")
     args = ap.parse_args()
+
+    explicit_branch = args.branch is not None
+    args.branch = args.branch or f"{BRANCH_PREFIX}{date.today()}"
 
     target = args.target.expanduser().resolve()
     skills_dir = target / "skills" / AUTHOR
@@ -305,9 +338,22 @@ def main() -> int:
         print("\nnothing to sync.")
         return 0
 
+    pending = None if explicit_branch else open_sync_pr(target)
+
     if args.dry_run:
-        print("\n--dry-run: nothing written.")
+        if pending:
+            print(f"\nnote: {pending} is still open — the changes above are "
+                  "probably already in it.")
+        print("--dry-run: nothing written.")
         return 0
+
+    if pending:
+        raise SystemExit(
+            f"a sync PR is already open: {pending}\n"
+            "  Merge or close it first — the plan above is computed against the "
+            "target's main,\n  so re-running now would open a duplicate. Pass "
+            "--branch NAME to override."
+        )
 
     require_clean_main(target)
     git(target, "checkout", "-b", args.branch)
@@ -373,7 +419,7 @@ def main() -> int:
     )
 
     result = subprocess.run(
-        ["gh", "pr", "create", "--repo", "nebiolabs/claude-config",
+        ["gh", "pr", "create", "--repo", REPO,
          "--base", "main", "--head", args.branch,
          "--title", subject, "--body", pr_body],
         cwd=target, capture_output=True, text=True,
