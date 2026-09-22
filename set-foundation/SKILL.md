@@ -127,12 +127,35 @@ has documents:
 
 ### B3. Do not invent
 
-**Every rule you propose in Mode B cites `file:line`.** If you cannot cite
+**Every rule you propose in Mode B carries a citation.** If you cannot cite
 it, it is not this project's architecture — it is your taste, and proposing
 it here launders an opinion into a foundation.
 
 Where you believe the code *should* have a rule it does not, that is a
 separate list, offered after the recovered ones and labelled as a suggestion.
+
+### Cite symbols, not line numbers
+
+A citation in a document written to outlive the session must survive editing.
+**A line number fails in both directions**, and the second failure is the one
+that matters:
+
+- An unrelated insertion above it invalidates the citation — a nuisance.
+- A deletion does *not* break it. It silently retargets whatever moved into
+  that slot, so the citation still resolves, to the wrong thing. **A citation
+  that resolves wrongly is worse than none**, because it looks checkable and
+  so nobody checks it twice.
+
+| Citing | Write | Why it holds |
+| --- | --- | --- |
+| A function or method | `` `.well_address()` (`R/plate-map.R`) `` | One grep or an LSP jump resolves it, and edits above it change nothing |
+| A test that goes red | the test's description, quoted | Stable, and renaming one is a deliberate act |
+| An expression inside a long function | the enclosing symbol **plus a quoted fragment** | The fragment is greppable; the symbol scopes the search |
+| A whole file's behaviour | the path alone | Nothing finer is being claimed |
+
+The principle, worth stating in the document you write so the next
+contributor follows it: **cite something that a rename or a deletion
+invalidates, and that an unrelated edit does not.**
 
 ## Step 2 — Put it to the user before writing anything
 
@@ -144,7 +167,8 @@ evidence:
 
 ```
 foundational  Well addresses are formatted in exactly one place
-              -> wells.R:44, enforced; test-wells.R:112 goes red
+              -> enforced in `.well_address()` (R/plate-map.R);
+                 test_that("well addresses stop at Z") goes red
 in question   Units are converted at the boundary, never inside
               -> only two call sites; the third would be awkward
 contract      Exported functions are verb_noun

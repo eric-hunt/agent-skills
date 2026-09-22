@@ -183,11 +183,11 @@ Report only the second kind. One line each, with where it landed:
 
 ```
 (inferred) Backfill rounds DOWN where every other quantity rounds to nearest
-           -> transfers.R:774, ARCHITECTURE.md "Rounding"
+           -> backfill_rows() (transfers.R:774); ARCHITECTURE.md "Rounding"
 (inferred) Retry budget is per-request, not per-session
-           -> client/retry.go:88
+           -> Client.do() (client/retry.go:88)
 (inferred) A partial write leaves the row present with a null status
-           -> store/writer.py:212
+           -> Writer.flush() (store/writer.py:212)
 ```
 
 Rules:
@@ -211,16 +211,56 @@ findings only — do not fix anything during the review.
 ### 2a. Does the prose match the code?
 
 For every behavioural claim in the intent documents touched in this range,
-**verify it against the source and cite `file:line`.** A claim checked against
-another document is not checked.
+**verify it against the source.** A claim checked against another document is
+not checked.
 
-Two failure shapes, and the second is the dangerous one:
+Three failure shapes, and the later two are the dangerous ones:
 
 - The prose is simply stale — says "will", describes a function that is gone.
 - The prose is *correct* but every worked example teaches a different model.
   This is worse, because the reader learns from the example. The shape to look
   for: the rule says the split happens on field A, and the only demo varies
   field B. Every reader now believes the split is on B.
+- The prose is correct about a path the code does not take. See *reading is
+  not verification*, below.
+
+### Verify the citations too, and count them
+
+Every citation in the intent documents is a claim. Resolve each one and
+**report the rot rate as a number** — it is the cheapest check in this skill
+and it found the most per unit effort in the first real trial.
+
+A line-number citation fails in two ways, and only the first is obvious: an
+insertion above it invalidates it, but a *deletion* silently retargets it to
+whatever moved into the slot. It still resolves — to the wrong thing. Three
+citations in eleven were wrong this way in a single phase.
+
+Report a wrong citation as a finding, and where a document cites by line at
+all, say so once: the durable fix is to cite a **symbol, a quoted test
+description, or a path**, not a line, so that a rename invalidates the
+citation and an unrelated edit does not.
+
+**In this report, cite both** — `` `.well_address()` (`R/plate-map.R:44`) ``.
+The report is read against the commit range in its own heading, usually within
+the hour, so the line number cannot rot before it is used and it saves the
+reader a search. The symbol is what makes the citation still meaningful if
+they come back to it next week.
+
+### Reading is not verification
+
+For a claim about behaviour under a condition — a default, a fallback, a
+guard, anything reached only on one branch — **reading the source is not
+enough. Run it.**
+
+The trial's one under-called finding was exactly this shape: an argument
+appeared to preserve a check, and reading the line supported that. Executing
+it showed a null-coalescing operator short-circuiting the call that raised, so
+the only validation of an input was silently skipped. The line read correctly
+and the branch never ran.
+
+Where running is impractical, say in the finding that the claim was read
+rather than executed. That is a different confidence level and the report
+should not flatten the two.
 
 ### 2b. Escalation language
 
@@ -295,7 +335,7 @@ For each strained rule:
 
 1. **The rule**, quoted, and where it is written.
 2. **The friction** — what the phase had to do to honour it, cited
-   `file:line`. Without this, there is nothing to weigh.
+   `symbol (file:line)`. Without this, there is nothing to weigh.
 3. **The project without it** — concretely. Which code disappears, which
    concepts stop needing names, what the public surface becomes.
 4. **What the rule buys** — the specific failure it prevents. If you cannot
@@ -403,16 +443,16 @@ Two constraints:
 _Depth N — <the signal that chose it>_
 
 ### Decisions made without asking
-(inferred) <claim>  -> <file:line>
+(inferred) <claim>  -> <symbol> (<file:line>)
 ...
 
 ### Tension
 **<one-line finding>** — <what is wrong, and the evidence>
-  <file:line>. Suggested: <the smallest change that resolves it>
+  <symbol> (<file:line>). Suggested: <the smallest change that resolves it>
 ...
 
 ### Counterfactual   <!-- depth 2-3 only -->
-**<rule>** — friction at <file:line>. Without it: <what changes>.
+**<rule>** — friction at <symbol> (<file:line>). Without it: <what changes>.
   It buys: <the failure prevented, or "nothing I can name">.
   Recommend: keep / narrow / drop.
 
