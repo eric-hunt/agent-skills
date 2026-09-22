@@ -127,12 +127,35 @@ has documents:
 
 ### B3. Do not invent
 
-**Every rule you propose in Mode B cites `file:line`.** If you cannot cite
+**Every rule you propose in Mode B carries a citation.** If you cannot cite
 it, it is not this project's architecture — it is your taste, and proposing
 it here launders an opinion into a foundation.
 
 Where you believe the code *should* have a rule it does not, that is a
 separate list, offered after the recovered ones and labelled as a suggestion.
+
+### Cite symbols, not line numbers
+
+A citation in a document written to outlive the session must survive editing.
+**A line number fails in both directions**, and the second failure is the one
+that matters:
+
+- An unrelated insertion above it invalidates the citation — a nuisance.
+- A deletion does *not* break it. It silently retargets whatever moved into
+  that slot, so the citation still resolves, to the wrong thing. **A citation
+  that resolves wrongly is worse than none**, because it looks checkable and
+  so nobody checks it twice.
+
+| Citing | Write | Why it holds |
+| --- | --- | --- |
+| A function or method | `` `.well_address()` (`R/plate-map.R`) `` | One grep or an LSP jump resolves it, and edits above it change nothing |
+| A test that goes red | the test's description, quoted | Stable, and renaming one is a deliberate act |
+| An expression inside a long function | the enclosing symbol **plus a quoted fragment** | The fragment is greppable; the symbol scopes the search |
+| A whole file's behaviour | the path alone | Nothing finer is being claimed |
+
+The principle, worth stating in the document you write so the next
+contributor follows it: **cite something that a rename or a deletion
+invalidates, and that an unrelated edit does not.**
 
 ## Step 2 — Put it to the user before writing anything
 
@@ -144,7 +167,8 @@ evidence:
 
 ```
 foundational  Well addresses are formatted in exactly one place
-              -> wells.R:44, enforced; test-wells.R:112 goes red
+              -> enforced in `.well_address()` (R/plate-map.R);
+                 test_that("well addresses stop at Z") goes red
 in question   Units are converted at the boundary, never inside
               -> only two call sites; the third would be awkward
 contract      Exported functions are verb_noun
@@ -250,25 +274,57 @@ Each rule, so that a later review can find it and check it:
 ```markdown
 ### Well addresses are formatted in exactly one place
 
-`foundational` · (agreed 2026-09-17)
+`foundational` · created: 2026-09-08 · agreed: 2026-09-16 · altered: 2026-09-18
 
 Two formatters drift, and the drift shows up as a plate that loads into the
 wrong rows — a wrong answer that looks right.
 
-Enforced at `wells.R:44`. Goes red at `tests/test-wells.R:112`.
+Enforced in `.well_address()` (`R/plate-map.R`). Goes red at
+`test_that("well addresses stop at Z")`.
 ```
 
 Four parts, all four load-bearing:
 
 1. **The rule**, one sentence, imperative, testable.
-2. **The tier**, plus provenance — `(agreed <date>)` when the user accepted
-   it, `(inferred)` when you decided it while implementing. An `(inferred)`
-   tag next to a `foundational` rule should be uncomfortable; that discomfort
-   is the mechanism.
+2. **The tier and its three dates** — see below.
 3. **The failure it prevents** — not a restatement of the rule. If the only
    reason you can give is "consistency", the tier is `contract`.
 4. **Where it is enforced, and what goes red.** A `foundational` rule with no
    failing example is the first thing to fix after this session.
+
+### The three dates
+
+A single `(agreed <date>)` cannot distinguish a rule whose current wording the
+author actually read from one an agent re-narrated afterwards. Three fields
+can, and the comparison between two of them is mechanical:
+
+| Field | Means | Who may write it |
+| --- | --- | --- |
+| `created:` | When the rule was first written into a document. Not when the code started behaving that way — that is archaeology, and usually unknowable. | Anyone |
+| `agreed:` | When the author and the agent settled this wording together. | **See the integrity rule below** |
+| `altered:` | When the wording was last changed *without* a fresh agreement. | An agent sets this every time it touches the rule |
+
+Omit a field that does not apply rather than inventing a value. Three
+properties make the extra line worth it:
+
+- **`altered:` newer than `agreed:` is unreviewed drift**, and unlike a tag
+  you have to remember to write, it is a *comparison* — greppable, countable,
+  and a natural first line in a review's record: *"3 rules where altered >
+  agreed."*
+- **A missing `agreed:` replaces the old `(inferred)` tag.** Absence is the
+  stronger signal, because you cannot forget to write it, and a column of
+  rules with no `agreed:` is visible at a glance.
+- **A re-agreement moves `agreed:` forward and makes `altered:` stale**, which
+  reads correctly: `altered < agreed` means the drift was subsequently
+  blessed.
+
+**The integrity rule: an agent may write `agreed:` only in the session where
+the user accepted that wording, and never retroactively.** Not from silence,
+not from "this has been here a while", not from an older agreement on
+different words. If you are the one who changed the wording, the field you
+touch is `altered:`. This is the only field with an integrity requirement, and
+the whole mechanism rests on it — a date you can talk yourself into is worth
+less than no date at all.
 
 ### Point the agent file at what happens next
 

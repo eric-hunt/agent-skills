@@ -41,6 +41,20 @@ Two reasons this matters more here than in an ordinary review:
 
 Fixes come after the user has read the report and said which ones to make.
 
+**"Changes nothing" is about the project, not about your scratch space.** A
+real review needs somewhere to put working notes, grep output, and the report
+itself while it is being assembled. Nominate one gitignored path up front and
+say where it is:
+
+```bash
+git check-ignore -q temp/ && echo "temp/ is ignored"
+```
+
+Everything the review writes goes there and nowhere else. Saying so at the
+start also makes the deliverable concrete — a report the user can reread and
+diff against the next one, rather than a wall of conversation that scrolls
+away.
+
 ## Step 1 — Scope the range
 
 Establish what "this phase" means before reading anything:
@@ -109,6 +123,7 @@ promotes.** Maturity alone never reaches depth 3.
 | A **rule** in the intent document changed in this range alongside the code it governs, several phases have landed cleanly, and the ask is routine — "run the review, draft the PR if nothing comes up" | **1 — drift** |
 | The behaviour changed and no rule governing it moved | **2 — decisions** |
 | The phase strained against a stated rule — a workaround, a special case, a "fix this later" | **2 — decisions** |
+| The range **created or re-tiered the rules themselves** | **2 — decisions**, and say in the report that Part 4 is structurally thin |
 | Nothing points anywhere | **2 — decisions** |
 
 This is the cheapest signal in the review, so check it mechanically:
@@ -122,6 +137,13 @@ A range that changed behaviour without touching the document describing that
 behaviour has very likely moved the code out from under the prose. Empty
 output is not a clean bill — it is the reason to run check 2a properly rather
 than skimming it.
+
+**Watch for the circular range.** If the rules were written *by the commits
+under review*, the depth-1 row matches for the wrong reason: a rule changed
+alongside the code because the rule is new, not because the design was
+revisited. Nothing has yet had a chance to disagree with it. Take the floor of
+2, say so in the report, and expect Part 4 to find almost nothing — no prior
+phase can have leaned on a tier that did not exist.
 
 **A touch is not alignment, and the second command is why the first is not
 enough.** A defect noted, a roadmap item ticked, a typo fixed, a link
@@ -167,6 +189,7 @@ user can send you up or down in one word.
 | 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
+| 2f document health | size and dead pointers | + tier distribution | all four questions |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
 
@@ -183,11 +206,11 @@ Report only the second kind. One line each, with where it landed:
 
 ```
 (inferred) Backfill rounds DOWN where every other quantity rounds to nearest
-           -> transfers.R:774, ARCHITECTURE.md "Rounding"
+           -> backfill_rows() (transfers.R:774); ARCHITECTURE.md "Rounding"
 (inferred) Retry budget is per-request, not per-session
-           -> client/retry.go:88
+           -> Client.do() (client/retry.go:88)
 (inferred) A partial write leaves the row present with a null status
-           -> store/writer.py:212
+           -> Writer.flush() (store/writer.py:212)
 ```
 
 Rules:
@@ -205,22 +228,62 @@ Rules:
 
 ## Part 2 — The tension pass
 
-Five checks. Each has a mechanical starting point, then judgement. Report
+Six checks. Each has a mechanical starting point, then judgement. Report
 findings only — do not fix anything during the review.
 
 ### 2a. Does the prose match the code?
 
 For every behavioural claim in the intent documents touched in this range,
-**verify it against the source and cite `file:line`.** A claim checked against
-another document is not checked.
+**verify it against the source.** A claim checked against another document is
+not checked.
 
-Two failure shapes, and the second is the dangerous one:
+Three failure shapes, and the later two are the dangerous ones:
 
 - The prose is simply stale — says "will", describes a function that is gone.
 - The prose is *correct* but every worked example teaches a different model.
   This is worse, because the reader learns from the example. The shape to look
   for: the rule says the split happens on field A, and the only demo varies
   field B. Every reader now believes the split is on B.
+- The prose is correct about a path the code does not take. See *reading is
+  not verification*, below.
+
+#### Verify the citations too, and count them
+
+Every citation in the intent documents is a claim. Resolve each one and
+**report the rot rate as a number** — it is the cheapest check in this skill
+and it found the most per unit effort in the first real trial.
+
+A line-number citation fails in two ways, and only the first is obvious: an
+insertion above it invalidates it, but a *deletion* silently retargets it to
+whatever moved into the slot. It still resolves — to the wrong thing. Three
+citations in eleven were wrong this way in a single phase.
+
+Report a wrong citation as a finding, and where a document cites by line at
+all, say so once: the durable fix is to cite a **symbol, a quoted test
+description, or a path**, not a line, so that a rename invalidates the
+citation and an unrelated edit does not.
+
+**In this report, cite both** — `` `.well_address()` (`R/plate-map.R:44`) ``.
+The report is read against the commit range in its own heading, usually within
+the hour, so the line number cannot rot before it is used and it saves the
+reader a search. The symbol is what makes the citation still meaningful if
+they come back to it next week.
+
+#### Reading is not verification
+
+For a claim about behaviour under a condition — a default, a fallback, a
+guard, anything reached only on one branch — **reading the source is not
+enough. Run it.**
+
+The trial's one under-called finding was exactly this shape: an argument
+appeared to preserve a check, and reading the line supported that. Executing
+it showed a null-coalescing operator short-circuiting the call that raised, so
+the only validation of an input was silently skipped. The line read correctly
+and the branch never ran.
+
+Where running is impractical, say in the finding that the claim was read
+rather than executed. That is a different confidence level and the report
+should not flatten the two.
 
 ### 2b. Escalation language
 
@@ -250,6 +313,20 @@ Then the harder half: for those that *do* have one, does it demonstrate the
 invariant itself or a side effect of it? An example can exercise exactly the
 right code path and still teach the wrong thing — it passes for a reason the
 reader never sees.
+
+**Apply that same test to any example you propose.** When you suggest an
+example for an invariant that lacks one, you must say *how it goes red* —
+what specifically breaks it, and why nothing else would produce that failure.
+A proposed example is a claim like any other, and it is wrong in exactly the
+way this check exists to catch more often than it looks.
+
+The trial's own miss: for *"this is implemented in exactly one place"*, the
+review proposed asserting that the local function equals the delegate across
+the legal range. But a faithful *copy* returns the same values, so equality
+cannot tell delegation from duplication — it passes either way. What actually
+goes red is the raised condition carrying the delegate's error as its parent,
+which a copy has nothing to populate. If you cannot name the thing that
+breaks, you have proposed a wish to replace a wish.
 
 ### 2d. New surface area
 
@@ -281,6 +358,41 @@ four, which apply everywhere and are the ones that pay off most often:
   produces a plausible-looking wrong answer rather than a loud failure, it is
   a trap. A bad value must not look like a good one.
 
+### 2f. Document health
+
+The first five checks read the documents for what they *say*. This one reads
+them as objects, because a project's own groundwork rules state thresholds
+that nothing otherwise checks — and an unchecked threshold is the same kind of
+wish as an invariant with no failing example.
+
+```bash
+wc -l <intent docs>
+grep -c '^### ' <the rules document>          # rule count
+grep -c 'foundational' <the rules document>   # tier distribution
+```
+
+Four questions, all mechanical:
+
+- **Size.** Is any document past the size its own project names as the point
+  to split? Past roughly 300 lines people stop re-reading and start grepping,
+  and a rule found by grep is read without its reasoning. Report the largest
+  and the threshold.
+- **Tier distribution.** If more than about two-thirds of the rules are
+  `foundational`, **the tier has stopped discriminating.** Report the
+  distribution as one finding rather than arguing the rules one at a time —
+  at that ratio the problem is the marking, not any individual mark.
+- **Dead pointers.** Does every document the agent file points at exist, and
+  does every document say when to read it? A pointer to something absent
+  teaches the reader that the pointers are decorative.
+- **Orphans.** Is there a document nothing sends a reader to at a known
+  moment, or a document whose only job is to list other documents? Both are
+  findings.
+
+Where the project's groundwork document states a threshold this list does not
+cover, check that too and say which one you used. **The general rule: any
+number a project writes down about its own documents should have somewhere in
+this review that reports against it.**
+
 ## Part 3 — The counterfactual pass
 
 *Depth 3 always; depth 2 only where the phase visibly strained against a rule.
@@ -295,7 +407,7 @@ For each strained rule:
 
 1. **The rule**, quoted, and where it is written.
 2. **The friction** — what the phase had to do to honour it, cited
-   `file:line`. Without this, there is nothing to weigh.
+   `symbol (file:line)`. Without this, there is nothing to weigh.
 3. **The project without it** — concretely. Which code disappears, which
    concepts stop needing names, what the public surface becomes.
 4. **What the rule buys** — the specific failure it prevents. If you cannot
@@ -368,6 +480,11 @@ it, the tiers freeze at the moment of least information.
 | An `in question` rule that other rules have come to depend on — it cannot be dropped now without touching them | → `foundational`, and say which rules pinned it |
 | A `contract` the code actually enforces | → `foundational`, or stop enforcing it |
 
+**If 2f found the distribution itself skewed, stop here.** Proposing five
+individual promotions into a set that is already two-thirds `foundational`
+makes the marking less informative, not more. Report the distribution and let
+the user re-cut it.
+
 ### Demote
 
 | What you saw | Suggest |
@@ -403,16 +520,16 @@ Two constraints:
 _Depth N — <the signal that chose it>_
 
 ### Decisions made without asking
-(inferred) <claim>  -> <file:line>
+(inferred) <claim>  -> <symbol> (<file:line>)
 ...
 
 ### Tension
 **<one-line finding>** — <what is wrong, and the evidence>
-  <file:line>. Suggested: <the smallest change that resolves it>
+  <symbol> (<file:line>). Suggested: <the smallest change that resolves it>
 ...
 
 ### Counterfactual   <!-- depth 2-3 only -->
-**<rule>** — friction at <file:line>. Without it: <what changes>.
+**<rule>** — friction at <symbol> (<file:line>). Without it: <what changes>.
   It buys: <the failure prevented, or "nothing I can name">.
   Recommend: keep / narrow / drop.
 
@@ -441,9 +558,12 @@ last, keep it short, and do not apologise for it — it should cost the reader
 four seconds to skip and cost you an explicit lie to fake.
 
 ```
-Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, cited to source
+Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
+             11 citations resolved, 3 wrong (see findings) — 27% rot
          2c: 3 invariants, each with a failing example
          2d: NAMESPACE +2, both extend an existing verb
+         2f: docs 4 files, largest 312 lines (>300 — flagged);
+             tiers 4/11 foundational
          4:  no tier drift — nothing leaned on an `in question` rule
 Skipped  2b project-wide, Part 3 — depth 1
 ```
@@ -469,12 +589,26 @@ seconds long before they start reading it.
 
 ## After the report
 
-Findings are not a to-do list. `Decide these` is the part the user reads
-first, so it holds only what actually needs them — not every finding, just
-the ones where you should not be the one to pick. Each is a question with its
-options and your recommendation, so the user can answer it in a word.
+Findings are not a to-do list. **Sort every finding into one of two piles,
+and make the sort the most visible thing the report does:**
 
-Three is a lot. If the list is longer, the phase needed this review sooner.
+- **Obvious fix, no decision needed.** You know what the right change is and
+  so will the user the moment they read it — a stale sentence, a wrong
+  citation, a missing test. These belong in the body and nowhere else. Do not
+  ask a question you already know the answer to; it costs the user the same
+  attention as a real one and teaches them the list is padded.
+- **Needs the user.** Two defensible options, or a cost only they can weigh.
+  These go in `Decide these`, each as a question with its options and your
+  recommendation, so it can be answered in a word.
+
+This sort is worth more than any single finding in the report. A review that
+produced thirteen findings and asked for three decisions has done the user's
+reading for them; one that hands over thirteen questions has just moved the
+work.
+
+Three decisions is a lot. If the list is longer, either the phase needed this
+review sooner, or you have not sorted hard enough — check the second before
+reporting the first.
 
 ### If the user asked for a PR when nothing comes up
 
