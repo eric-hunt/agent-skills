@@ -167,6 +167,7 @@ user can send you up or down in one word.
 | 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
+| 2f document health | size and dead pointers | + tier distribution | all four questions |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
 
@@ -205,7 +206,7 @@ Rules:
 
 ## Part 2 — The tension pass
 
-Five checks. Each has a mechanical starting point, then judgement. Report
+Six checks. Each has a mechanical starting point, then judgement. Report
 findings only — do not fix anything during the review.
 
 ### 2a. Does the prose match the code?
@@ -291,6 +292,20 @@ invariant itself or a side effect of it? An example can exercise exactly the
 right code path and still teach the wrong thing — it passes for a reason the
 reader never sees.
 
+**Apply that same test to any example you propose.** When you suggest an
+example for an invariant that lacks one, you must say *how it goes red* —
+what specifically breaks it, and why nothing else would produce that failure.
+A proposed example is a claim like any other, and it is wrong in exactly the
+way this check exists to catch more often than it looks.
+
+The trial's own miss: for *"this is implemented in exactly one place"*, the
+review proposed asserting that the local function equals the delegate across
+the legal range. But a faithful *copy* returns the same values, so equality
+cannot tell delegation from duplication — it passes either way. What actually
+goes red is the raised condition carrying the delegate's error as its parent,
+which a copy has nothing to populate. If you cannot name the thing that
+breaks, you have proposed a wish to replace a wish.
+
 ### 2d. New surface area
 
 Diff the public surface identified in Step 2. For each newly exported
@@ -320,6 +335,41 @@ four, which apply everywhere and are the ones that pay off most often:
 - **A default that is a guess about the real world** — if getting it wrong
   produces a plausible-looking wrong answer rather than a loud failure, it is
   a trap. A bad value must not look like a good one.
+
+### 2f. Document health
+
+The first five checks read the documents for what they *say*. This one reads
+them as objects, because a project's own groundwork rules state thresholds
+that nothing otherwise checks — and an unchecked threshold is the same kind of
+wish as an invariant with no failing example.
+
+```bash
+wc -l <intent docs>
+grep -c '^### ' <the rules document>          # rule count
+grep -c 'foundational' <the rules document>   # tier distribution
+```
+
+Four questions, all mechanical:
+
+- **Size.** Is any document past the size its own project names as the point
+  to split? Past roughly 300 lines people stop re-reading and start grepping,
+  and a rule found by grep is read without its reasoning. Report the largest
+  and the threshold.
+- **Tier distribution.** If more than about two-thirds of the rules are
+  `foundational`, **the tier has stopped discriminating.** Report the
+  distribution as one finding rather than arguing the rules one at a time —
+  at that ratio the problem is the marking, not any individual mark.
+- **Dead pointers.** Does every document the agent file points at exist, and
+  does every document say when to read it? A pointer to something absent
+  teaches the reader that the pointers are decorative.
+- **Orphans.** Is there a document nothing sends a reader to at a known
+  moment, or a document whose only job is to list other documents? Both are
+  findings.
+
+Where the project's groundwork document states a threshold this list does not
+cover, check that too and say which one you used. **The general rule: any
+number a project writes down about its own documents should have somewhere in
+this review that reports against it.**
 
 ## Part 3 — The counterfactual pass
 
@@ -407,6 +457,11 @@ it, the tiers freeze at the moment of least information.
 | A rule that now has an example that goes red, where it had none before | → `foundational` |
 | An `in question` rule that other rules have come to depend on — it cannot be dropped now without touching them | → `foundational`, and say which rules pinned it |
 | A `contract` the code actually enforces | → `foundational`, or stop enforcing it |
+
+**If 2f found the distribution itself skewed, stop here.** Proposing five
+individual promotions into a set that is already two-thirds `foundational`
+makes the marking less informative, not more. Report the distribution and let
+the user re-cut it.
 
 ### Demote
 
