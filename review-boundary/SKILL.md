@@ -247,7 +247,7 @@ Three failure shapes, and the later two are the dangerous ones:
 - The prose is correct about a path the code does not take. See *reading is
   not verification*, below.
 
-### Verify the citations too, and count them
+#### Verify the citations too, and count them
 
 Every citation in the intent documents is a claim. Resolve each one and
 **report the rot rate as a number** — it is the cheapest check in this skill
@@ -269,7 +269,7 @@ the hour, so the line number cannot rot before it is used and it saves the
 reader a search. The symbol is what makes the citation still meaningful if
 they come back to it next week.
 
-### Reading is not verification
+#### Reading is not verification
 
 For a claim about behaviour under a condition — a default, a fallback, a
 guard, anything reached only on one branch — **reading the source is not
