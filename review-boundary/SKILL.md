@@ -193,6 +193,7 @@ user can send you up or down in one word.
 | 2f document health | size and dead pointers | + tier distribution and enforcement split | all four questions, + movement |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
+| Part 5 | if the range remediates a review | same | same |
 
 At depth 1 the architecture is settled: report drift against it, do not
 relitigate it. At depth 3 the architecture is the subject.
@@ -633,6 +634,32 @@ Two constraints:
   earned anything; it has merely not been in the way. Cite the phases that
   leaned on it, or leave the tier where it is.
 
+## Part 5 — A previous round's fixes
+
+*Every depth, whenever the range remediates an earlier review* — commit
+messages that cite one, or an earlier report sitting in the scratch path.
+
+**A review reports instances; a fix has to address the class.** So do not
+check that the named instances were fixed. That is the one thing the author
+certainly did. Check whether **other instances of the same class** survive:
+
+1. For each fix, state the defect's general form in one line — not "line 40
+   of the README says three", but "a count of defects restated outside the
+   defects document".
+2. Search for that form repository-wide.
+3. **Include generated output** — `man/`, rendered notebooks, built docs,
+   anything nobody edits by hand and therefore nobody greps.
+
+In the trials that motivated this, every round of remediation introduced at
+least one error the next round caught. The clearest case: a review listed
+three files carrying a retired rule, the author fixed those three, and four
+more survived, one of them in the shipped manual. One commit later, the same
+shape again with a number updated in one file and stale in four. The worst
+surviving instance lived in generated output both times.
+
+Report survivors as tension findings. In the clean block, the scope: how many
+fixes, each swept for its class, where.
+
 ## Report format
 
 ```markdown
@@ -688,6 +715,7 @@ Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
              tiers 10/13 foundational, recovered at v0.5.0 — survivorship;
              3 armored, 7 vigilant (5 swept in 2c, 2 future-code prohibitions)
          4:  no tier drift — nothing leaned on an `in question` rule
+         5:  3 fixes from the last review, each class swept incl. man/
 Skipped  2b project-wide, Part 3 — depth 1
 ```
 
