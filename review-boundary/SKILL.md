@@ -308,7 +308,13 @@ two need opposite fixes.
 
 For each prohibition in the invariant list, find the test, notebook cell, or
 CI check that goes red when it is violated. Report the ones with none.
-**A prohibition with no such example is a wish.**
+**A prohibition with no such example is a wish** — with one exception. A
+prohibition on *future* code (*"resist adding a mode argument"*, *"code that
+answers a different question moves out"*) cannot have an example, because
+there is nothing to run until someone writes the thing forbidden. Do not ask
+for one. It is vigilant by construction, and it belongs in the sweep below.
+If you can name the forbidden form concretely, though, it is not this
+exception: a named form can be swept for.
 
 Then the harder half: for those that *do* have one, does it demonstrate the
 invariant itself or a side effect of it? An example can exercise exactly the
@@ -328,6 +334,25 @@ cannot tell delegation from duplication — it passes either way. What actually
 goes red is the raised condition carrying the delegate's error as its parent,
 which a copy has nothing to populate. If you cannot name the thing that
 breaks, you have proposed a wish to replace a wish.
+
+#### Sweep the vigilant rules yourself
+
+A test of known cases cannot notice a *new* case. For every vigilant
+`foundational` rule (2f's list, or classify the ones this depth covers),
+**do the search the tests cannot**: look for a new instance of the violation.
+Search the range at every depth. At depth 2 and above, search the whole
+source as well, because a vigilant rule's earlier violations had nothing to
+catch them either.
+
+This is the check that paid off on a mature project: a `foundational`
+one-formatter rule, two cited tests, both passing — and a third formatter in a
+plotting file neither test looked at, collapsing a quarter of a large plate
+into one `NA` category. It had shipped. The tier said the rule mattered; only
+the enforcement kind said nobody was watching.
+
+When the sweep finds one, the obvious fix is **to armor the rule**, not only
+to fix the instance: propose the source sweep or constraint that would have
+caught it, held to the standard above.
 
 ### 2d. New surface area
 
@@ -538,9 +563,20 @@ tiers exist to record, not a symptom. The evidence bar below does not change.
 | What you saw | Suggest |
 | --- | --- |
 | A `foundational` rule this phase worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
-| A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract` |
+| A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract`. Not for a prohibition on future code, which cannot have one — leave its tier alone |
 | A rule whose stated failure has never happened and which you cannot construct a case for | → `in question` |
 | A `foundational` rule nothing in the range could have violated | → probably `contract`; it is describing style, not constraining behaviour |
+
+### Armor
+
+Enforcement moves too, and it is recorded here because it is evidence about a
+rule — but it is **not a tier move**, and the report should not make it look
+like one:
+
+| What you saw | Record |
+| --- | --- |
+| The range added a check that catches a novel violation of a rule that had only known-case tests | `armored` — and the rule's enforcement line should now say so |
+| The range removed or narrowed such a check | `unarmored` — usually by accident, so it is also a 2c finding |
 
 Report each as one line, in the user's own terms — the tier was their call,
 so the finding is evidence, not a verdict:
@@ -550,6 +586,8 @@ promote  "Units convert at the boundary"  in question -> foundational
          3 phases relied on it; test-units.R:40 now goes red when violated
 demote   "One well-address formatter"     foundational -> in question
          this phase added a second path at wells.R:210 rather than extend it
+armored  "Grid identity"                  (stays foundational)
+         test-grid.R:12 now sweeps R/ for LETTERS[ outside `.well_row()`
 ```
 
 Two constraints:
@@ -586,6 +624,8 @@ promote  "<rule>"  <from> -> <to>
          <the evidence from this phase>
 demote   "<rule>"  <from> -> <to>
          <the evidence from this phase>
+armored  "<rule>"  (tier unchanged)
+         <the check that now catches a novel violation>
 
 Clean    <check>: <what was examined, counted> ...
 Skipped  <check> — <why, usually the depth>
