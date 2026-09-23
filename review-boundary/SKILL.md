@@ -190,7 +190,7 @@ user can send you up or down in one word.
 | 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
-| 2f document health | size and dead pointers | + tier distribution | all four questions |
+| 2f document health | size and dead pointers | + tier distribution and enforcement split | all four questions, + movement |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
 
@@ -370,18 +370,60 @@ wish as an invariant with no failing example.
 wc -l <intent docs>
 grep -c '^### ' <the rules document>          # rule count
 grep -c 'foundational' <the rules document>   # tier distribution
+grep -ciE '\*\*(armored|vigilant)' <the rules document>   # enforcement, if recorded
 ```
 
-Four questions, all mechanical:
+Four questions, each with a mechanical start:
 
 - **Size.** Is any document past the size its own project names as the point
   to split? Past roughly 300 lines people stop re-reading and start grepping,
   and a rule found by grep is read without its reasoning. Report the largest
   and the threshold.
-- **Tier distribution.** If more than about two-thirds of the rules are
-  `foundational`, **the tier has stopped discriminating.** Report the
-  distribution as one finding rather than arguing the rules one at a time —
-  at that ratio the problem is the marking, not any individual mark.
+- **Tier distribution, and what it is measuring.** Count the tiers, then
+  place the project *before* reading the number, because the same ratio means
+  opposite things in two populations:
+
+  | The tiers were | A high `foundational` share means | Report |
+  | --- | --- | --- |
+  | Predicted before the code, or the project is in its first few phases | Importance marked as confidence — **the tier has stopped discriminating** | Past about two-thirds: the distribution, as one finding rather than arguing the rules one at a time. At that ratio the problem is the marking, not any mark |
+  | Recovered from a codebase that has been through many phases, or promoted one at a time on evidence | **Survivorship.** The rules that were not load-bearing have already been deleted, and `in question` rules lock in as phases lean on them. The share only climbs, so past some age it mostly reports that the project is old | Do not argue the ratio. Report the enforcement split below, with the vigilant rules by name |
+
+  The tiered document's first line should say which (`set-foundation` writes
+  *"predicted before the code"* or *"recovered from the code at <ref>"*).
+  Where it does not, place the project from the history — release tags,
+  concepts deleted along the way, whether the `foundational` rules cite
+  guards older than the document — and say which signals you used.
+
+  **The enforcement split.** For each `foundational` rule, is it *armored* —
+  would a violation nobody anticipated still go red — or *vigilant*, defended
+  only by tests of the cases someone thought of? Use the word the rule
+  records if it records one; otherwise apply the test yourself: **write the
+  likeliest violation in a file that does not exist yet, and ask whether
+  anything goes red.** A source sweep or a type constraint catches it; a test
+  of known inputs does not. A prohibition on future code is vigilant by
+  construction — count those separately so nobody reads them as missing
+  tests. Report *"A of N foundational rules armored"* and name the vigilant
+  ones. Unlike the ratio, this number **falls** as a project matures, because
+  absorbing a rule into the build is what maturing looks like, and it points
+  at the population where a real violation ships with every test green. 2c
+  spends its attention there.
+
+  **Movement**, where the tiers are old enough to have any. What most
+  distinguishes a healthy rule set is whether its tiers still move — promoted,
+  demoted, armored:
+
+  ```bash
+  git log -p --format='%h %as' -- <the rules document> \
+    | grep -E '^([0-9a-f]{7,} |[-+]`(foundational|in question|contract)`)'
+  ```
+
+  Read the pairs: a `-`/`+` pair with different tiers is a move, a pair with
+  the same tier is only a date changing, and a lone `+` is a new rule.
+  Armoring does not show here — check the rules' enforcement lines in the same
+  log. A high share with tiers still moving is fine. **Zero movement across many
+  phases is the smell, whatever the ratio** — the tiers have frozen at the
+  moment of least information. Say how many phases the count covers; three
+  weeks of tiers cannot have moved much.
 - **Dead pointers.** Does every document the agent file points at exist, and
   does every document say when to read it? A pointer to something absent
   teaches the reader that the pointers are decorative.
@@ -481,10 +523,15 @@ it, the tiers freeze at the moment of least information.
 | An `in question` rule that other rules have come to depend on — it cannot be dropped now without touching them | → `foundational`, and say which rules pinned it |
 | A `contract` the code actually enforces | → `foundational`, or stop enforcing it |
 
-**If 2f found the distribution itself skewed, stop here.** Proposing five
-individual promotions into a set that is already two-thirds `foundational`
-makes the marking less informative, not more. Report the distribution and let
-the user re-cut it.
+**If 2f found the marking itself skewed — importance recorded as
+confidence — stop here.** Proposing five individual promotions into a set
+that is already two-thirds `foundational` for that reason makes the marking
+less informative, not more. Report the distribution and let the user re-cut
+it.
+
+**If 2f placed a high share as survivorship, promote as normal.** An
+`in question` rule locking in after phases have leaned on it is the lifecycle
+tiers exist to record, not a symptom. The evidence bar below does not change.
 
 ### Demote
 
@@ -564,7 +611,8 @@ Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
          2c: 3 invariants, each with a failing example
          2d: NAMESPACE +2, both extend an existing verb
          2f: docs 4 files, largest 312 lines (>300 — flagged);
-             tiers 4/11 foundational
+             tiers 10/13 foundational, recovered at v0.5.0 — survivorship;
+             3 armored, 7 vigilant (5 swept in 2c, 2 future-code prohibitions)
          4:  no tier drift — nothing leaned on an `in question` rule
 Skipped  2b project-wide, Part 3 — depth 1
 ```
