@@ -270,6 +270,22 @@ the hour, so the line number cannot rot before it is used and it saves the
 reader a search. The symbol is what makes the citation still meaningful if
 they come back to it next week.
 
+#### Quantifiers are claims about scope
+
+Anchoring a citation fixes *where* it points. It does nothing for what the
+sentence around it claims, and that is where rot went once citations stopped
+rotting: four wrong claims in three commits, each next to a citation that
+resolved correctly.
+
+- **"only", "never", "always", "every", "unconditionally"** are claims about
+  the whole repository. A read of the cited file cannot support one. Verify
+  each with a repository-wide search, as a claim in its own right — "the only
+  two calls" was four.
+- **A sentence describing what a function does to its inputs** — "has
+  already populated every row", "never leaves the function" — is checked
+  against the function body, not against the function's name. One such claim
+  was contradicted two lines into the function it described.
+
 #### Reading is not verification
 
 For a claim about behaviour under a condition — a default, a fallback, a
