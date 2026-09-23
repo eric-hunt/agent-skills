@@ -190,7 +190,7 @@ user can send you up or down in one word.
 | 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
-| 2f document health | size and dead pointers | + tier distribution and enforcement split | all four questions, + movement |
+| 2f document health | size and dead pointers | + tier distribution, enforcement split, movement | all four questions |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
 | Part 5 | if the range remediates a review | same | same |
@@ -463,10 +463,10 @@ Four questions, each with a mechanical start:
   of known inputs does not. A prohibition on future code is vigilant by
   construction — count those separately so nobody reads them as missing
   tests. Report *"A of N foundational rules armored"* and name the vigilant
-  ones. Unlike the ratio, this number **falls** as a project matures, because
-  absorbing a rule into the build is what maturing looks like, and it points
-  at the population where a real violation ships with every test green. 2c
-  spends its attention there.
+  ones. Unlike the ratio, the vigilant share **falls** as a project matures,
+  because absorbing a rule into the build is what maturing looks like, and it
+  points at the population where a real violation ships with every test
+  green. 2c spends its attention there.
 
   **Movement**, where the tiers are old enough to have any. What most
   distinguishes a healthy rule set is whether its tiers still move — promoted,
@@ -479,10 +479,10 @@ Four questions, each with a mechanical start:
 
   Read the pairs: a `-`/`+` pair with different tiers is a move, a pair with
   the same tier is only a date changing, and a lone `+` is a new rule.
-  Armoring does not show here — check the rules' enforcement lines in the same
-  log. A high share with tiers still moving is fine. **Zero movement across many
-  phases is the smell, whatever the ratio** — the tiers have frozen at the
-  moment of least information. Say how many phases the count covers; three
+  Armoring does not show here — check the rules' enforcement lines in the
+  same log. A high share with tiers still moving is fine. **Zero movement
+  across many phases is the smell, whatever the ratio** — the tiers have
+  frozen at the moment of least information. Say how many phases the count covers; three
   weeks of tiers cannot have moved much.
 - **Dead pointers.** Does every document the agent file points at exist, and
   does every document say when to read it? A pointer to something absent
