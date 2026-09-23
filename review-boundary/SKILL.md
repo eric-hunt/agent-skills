@@ -337,11 +337,29 @@ invariant itself or a side effect of it? An example can exercise exactly the
 right code path and still teach the wrong thing — it passes for a reason the
 reader never sees.
 
+And does it depend on **a value someone else owns**? A test asserting that
+input `X` is rejected is pinned to `X` being rejectable. If an upstream
+package, a vendor specification or a config default can reclassify `X`, the
+test goes red on a *fix* rather than a regression. In one trial an upstream
+release lifted a limit and four tests broke, all using the out-of-range index
+as a sentinel for "invalid", while a boundary test written with no hardcoded
+bound followed the new range unchanged. Prefer the example no external change
+can reclassify.
+
 **Apply that same test to any example you propose.** When you suggest an
 example for an invariant that lacks one, you must say *how it goes red* —
 what specifically breaks it, and why nothing else would produce that failure.
 A proposed example is a claim like any other, and it is wrong in exactly the
 way this check exists to catch more often than it looks.
+
+Saying so has not been enough: the miss below recurred in a later trial,
+after this paragraph existed, and took two more attempts to fix. So make it
+mechanical. **Name the likeliest wrong implementation** — a faithful copy, a
+hardcoded value, a second path, a sentinel someone else owns — and check the
+proposed example fails against it. Where running is practical, run it,
+against a throwaway copy under the scratch path, never the working tree.
+Report which you did: *"fails against a local copy (run)"* and *"should fail
+against a local copy (read)"* are different confidence levels.
 
 The trial's own miss: for *"this is implemented in exactly one place"*, the
 review proposed asserting that the local function equals the delegate across
