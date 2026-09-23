@@ -29,7 +29,7 @@ Every rule you write gets exactly one:
 
 | Tier | Means | The test | Cost of getting it wrong |
 | --- | --- | --- | --- |
-| `foundational` | Load-bearing. Changing it changes what the project *is*. | Can you name the failure it prevents, and has that failure happened or would it plausibly happen? | Marked too freely, everything is foundational and the tier stops carrying information. |
+| `foundational` | Load-bearing. Changing it changes what the project *is*. | Can you name the failure it prevents, and has that failure happened or would it plausibly happen? | Marked too freely — for importance rather than confidence — everything is foundational and the tier stops carrying information. (A high share on a mature codebase is usually not this; see *B4*.) |
 | `in question` | Written to get moving. Plausible, never earned. | Would you be relieved or annoyed if someone showed you a simpler design without it? | The honest default. Under-using this is the failure mode this skill exists to fix. |
 | `contract` | A loose agreement kept for consistency — naming, layout, formatting. | Would a violation be *wrong*, or just *inconsistent*? | Cheap either way; these exist so they stop competing for attention with the real rules. |
 
@@ -135,6 +135,30 @@ it here launders an opinion into a foundation.
 
 Where you believe the code *should* have a rule it does not, that is a
 separate list, offered after the recovered ones and labelled as a suggestion.
+
+### B4. On a mature codebase, expect a lot of `foundational`
+
+`in question` is the default, and a rule reaches `foundational` by argument.
+On a project that has been through many phases, the argument is often already
+in the history: the guard that was added with a bug fix, the concept that was
+deleted because this rule made it redundant, the three refactors the rule
+survived. What survives that is *selected* for being load-bearing. Tier each
+rule honestly on its own evidence and **let the share land where it lands** —
+two-thirds or more is normal here, and pulling rules back down to hit a ratio
+would be the dishonest move.
+
+Two things keep a high share from hiding a problem:
+
+- **Report the armored/vigilant split alongside it.** On a mature project
+  that split is the number that locates risk — see *Armored or vigilant*.
+- **Say how the tiers were laid**, in the tiered document's first line (see
+  *Give every document a first line*). A later review reads a high share very
+  differently depending on whether the rules were predictions or recoveries,
+  and without the line it has to guess.
+
+Tell the user this during Step 2, before they see the count. A review will
+otherwise raise the ratio later, and it is better that they meet the
+reasoning here than argue it there.
 
 ### Cite symbols, not line numbers
 
@@ -263,6 +287,20 @@ _Read when writing or fixing a test. What the code **must** do is in
 
 That line is what makes a five-document `docs/` navigable, and it is the
 thing that stops the architecture document slowly absorbing everything else.
+
+The tiered document's first line also says **how its tiers were laid**, since
+that is the one fact a later review cannot recover from the rules themselves:
+
+```markdown
+# Architecture
+
+_Read before changing behaviour. Tiers recovered from the code at v0.5.0
+(2026-09-23); `in question` rules are the open ones._
+```
+
+Write *"predicted before the code"* for Mode A and *"recovered from the code
+at <tag or commit>"* for Mode B. Leave it alone afterwards: re-tiers are
+dated on each rule, and this line records only where the set began.
 
 ### Anti-patterns
 
