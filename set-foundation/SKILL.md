@@ -342,8 +342,9 @@ Four parts, all four load-bearing:
 
 A failing example says a rule *can* go red. It does not say whether it goes
 red for the violation that actually arrives, which is usually one nobody has
-written yet. So the fourth part names the kind, in one word a review can
-count:
+written yet. So the fourth part names the kind, in one bolded word —
+`**Armored:**` or `**Vigilant:**`, as in the example — so a review can count
+them with a grep:
 
 | Kind | Means | Typical enforcer |
 | --- | --- | --- |
@@ -480,7 +481,9 @@ something.
 `review-boundary` reads these tiers directly: it will report friction
 against a `foundational` rule but not propose dropping it unasked, will go
 after `in question` rules first when you ask for a critical review, and will
-not spend a counterfactual on a `contract`.
+not spend a counterfactual on a `contract`. It reads the enforcement word too:
+the vigilant `foundational` rules are the ones it searches for new violations
+itself, since nothing else will.
 
 ## What this is not
 
