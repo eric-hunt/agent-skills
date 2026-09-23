@@ -108,7 +108,7 @@ blocker.
 
 ## Step 3 — Pick a depth
 
-Every depth runs Part 1 and all five tension checks. What changes is the
+Every depth runs Part 1 and all six tension checks. What changes is the
 **radius** — this range, or the whole project — and whether the architecture
 itself is on the table. **Depth is never permission to look less carefully.**
 A check run shallowly and reported clean is the one failure this review
@@ -779,9 +779,14 @@ A PR opened over an unanswered question buries the question.
 
 - **Not a code review.** Correctness, tests and performance belong elsewhere.
   This is about what the work *decided*.
-- **Not a rubber stamp.** "No tension found" across five checks on a real phase
+- **Not a rubber stamp.** "No tension found" across six checks on a real phase
   usually means the checks were run shallowly. Say which checks were shallow
   rather than reporting clean.
+- **Not a guess.** When the repository cannot answer something — whether a
+  decision was put to the user, why a guard exists — say so in those words:
+  *"I cannot tell from the repository whether this was put to you."* Across
+  four trials this was the habit that made the reports trustworthy, and it is
+  easy to train out by accident by rewarding confident answers. Keep it.
 - **Not license to refactor.** Report, then let the user choose — see
   *This review changes nothing*.
 - **Not a plan.** It surfaces what needs deciding; it does not decide, and it
