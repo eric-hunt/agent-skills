@@ -122,7 +122,8 @@ has documents:
 - **Stated but unenforced** — a document says it, nothing goes red when it is
   violated. *A prohibition with no failing example is a wish.* Either it needs
   an example or it needs demoting to `contract` — put both options to the
-  user.
+  user. The exception is a prohibition on *future* code, which cannot have an
+  example at all; see *Armored or vigilant*.
 - **Stated and contradicted** — the document says one thing, the code does
   another. Report the code's version; it is the one that ships.
 
@@ -170,6 +171,7 @@ evidence:
 foundational  Well addresses are formatted in exactly one place
               -> enforced in `.well_address()` (R/plate-map.R);
                  test_that("well addresses stop at Z") goes red
+                 vigilant — a second formatter elsewhere would pass
 in question   Units are converted at the boundary, never inside
               -> only two call sites; the third would be awkward
 contract      Exported functions are verb_noun
@@ -185,6 +187,9 @@ Flag explicitly:
 - Any `in question` rule the user seems to treat as settled — that mismatch
   is the whole point of the exercise.
 - Anything you found enforced that the user did not know was enforced.
+- Any `foundational` rule the user believes is enforced when the enforcement
+  is only vigilant. Users tend to remember that a test exists, not what it
+  would miss.
 
 ## Step 3 — Write the documents
 
@@ -281,7 +286,8 @@ Two formatters drift, and the drift shows up as a plate that loads into the
 wrong rows — a wrong answer that looks right.
 
 Enforced in `.well_address()` (`R/plate-map.R`). Goes red at
-`test_that("well addresses stop at Z")`.
+`test_that("well addresses stop at Z")`. **Vigilant:** the test pins the one
+formatter we know about; a second formatter in a new file would pass it.
 ```
 
 Four parts, all four load-bearing:
@@ -290,8 +296,51 @@ Four parts, all four load-bearing:
 2. **The tier and its three dates** — see below.
 3. **The failure it prevents** — not a restatement of the rule. If the only
    reason you can give is "consistency", the tier is `contract`.
-4. **Where it is enforced, and what goes red.** A `foundational` rule with no
-   failing example is the first thing to fix after this session.
+4. **Where it is enforced, what goes red, and which kind of red** — see
+   below. A `foundational` rule with no failing example is the first thing to
+   fix after this session, unless it is a prohibition on future code.
+
+### Armored or vigilant
+
+A failing example says a rule *can* go red. It does not say whether it goes
+red for the violation that actually arrives, which is usually one nobody has
+written yet. So the fourth part names the kind, in one word a review can
+count:
+
+| Kind | Means | Typical enforcer |
+| --- | --- | --- |
+| **Armored** | A violation nobody anticipated still goes red | A sweep over the source (grep or AST walk in a test), a type or schema constraint, a structure in which the second path cannot be built |
+| **Vigilant** | Only the cases someone thought of go red | Tests of known inputs, a reviewer who remembers |
+
+**The test: write the likeliest violation in a file that does not exist
+yet.** A second formatter in a new module, a new call site that skips the
+guard, a new class without the check. If something still goes red, the rule is
+armored. If only the files someone already knew about are watched, it is
+vigilant. A thorough property-based test sits in between; say which way you
+called it and why.
+
+This is **not a fourth tier.** A tier is a claim about confidence; armoring is
+a fact about enforcement. A rule can be armored and still `in question`, or
+`foundational` and defended only by whoever remembers it. Keep the word in the
+fourth part, never in the tier line, so the two axes cannot blur into one.
+
+A vigilant `foundational` rule is not a reason to demote. It is the thing a
+review needs to know in order to spend its attention, because a vigilant rule
+is where a real violation can ship with every test green.
+
+**A prohibition on future code is permanently vigilant.** *"Resist adding a
+mode argument for X"*, *"code that answers a different question moves out of
+this package"* — there is nothing to run until someone writes the thing
+forbidden, and the forbidden thing has no fixed form to sweep for. Record it as
+vigilant by construction, not as a rule missing its test, so nobody goes
+looking for an example that cannot exist. Two limits keep this from becoming a
+place to park any unenforced rule:
+
+- **If you can name the forbidden form, it is not this category.** "No second
+  call to `quantize()` outside `R/units.R`" can be swept for. Sweep for it.
+- **It still needs evidence.** Where there is no test, cite the history
+  instead: the commits that moved code out, the deviation that was proposed
+  and declined.
 
 ### The three dates
 
@@ -380,9 +429,15 @@ contributor where a defect goes *before* they put it in the wrong file.
 
 Say plainly which rules are now on probation:
 
-> N foundational, N in question, N contracts. The `in question` ones are
-> predictions — the first phase that strains against one should cost out the
-> deviation rather than work around it.
+> N foundational (A armored, V vigilant), N in question, N contracts. The
+> `in question` ones are predictions — the first phase that strains against
+> one should cost out the deviation rather than work around it. The vigilant
+> `foundational` ones are defended by memory: <name them>.
+
+Naming the vigilant rules is the useful half of that sentence. It tells the
+user where a violation can ship with every test green, and it tells them which
+rules would repay a sweep if they ever want to spend an afternoon armoring
+something.
 
 `review-boundary` reads these tiers directly: it will report friction
 against a `foundational` rule but not propose dropping it unasked, will go
