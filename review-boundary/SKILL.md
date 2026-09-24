@@ -20,8 +20,13 @@ them. A decision recorded in prose acquires authority it has not earned, and
 the person paying for the resulting complexity never gets a chance to object.
 This review is that chance.
 
-**Output a short report. Twenty reviewable lines beat a seven-hundred-line
-document — the long document is how the problem started.**
+**Output a report whose decisions can be read in twenty lines.** A
+seven-hundred-line document is how the problem started, and a review that
+reproduces one has failed however right it is. The report can run longer than
+twenty lines, because the evidence has to live somewhere: citations,
+run-or-read labels, the clean block. What must stay short is the skeleton, the
+bold one-line findings plus `Decide these`, and it must be readable on its
+own. See *Report format*.
 
 ## This review changes nothing
 
@@ -701,8 +706,9 @@ _Depth N — <the signal that chose it>_
 ...
 
 ### Tension
-**<one-line finding>** — <what is wrong, and the evidence>
-  <symbol> (<file:line>). Suggested: <the smallest change that resolves it>
+**<one-line finding, the whole claim in one sentence>**
+  <the evidence> <symbol> (<file:line>) (run | read)
+  Suggested: <the smallest change that resolves it>
 ...
 
 ### Counterfactual   <!-- depth 2-3 only -->
@@ -728,6 +734,15 @@ Skipped  <check> — <why, usually the depth>
 
 Rank tension findings by what they cost if left: a wrong model taught to
 future readers outranks a stale sentence.
+
+**Write for two readings.** The first reads only the bold lines and `Decide
+these`, and should come away knowing everything that matters, in about twenty
+lines. The second goes down into the indented evidence for the one finding
+they doubt. So the bold line carries the whole claim: *"Grid identity has a
+live violation in the plot path"*, not *"Grid identity"*. Evidence is
+indented beneath it, never run into the same sentence. A report laid out this
+way can be a hundred and fifty lines long and still take a minute to use; one
+that buries its claims in paragraphs takes longer at forty.
 
 ### The clean block
 
