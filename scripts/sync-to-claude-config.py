@@ -170,6 +170,11 @@ def render_author_readme(skills: list[dict[str, str]]) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines).rstrip()) + "\n"
 
 
+def cells(row: str) -> list[str]:
+    """A table row's cells with padding stripped, for comparing content."""
+    return [c.strip() for c in row.strip().strip("|").split("|")]
+
+
 ROOT_ROW = re.compile(r"^\|\s*\[`(?P<name>[^`]+)`\]\((?P<path>[^)]+)\)\s*\|(?P<rest>.*)\|\s*$")
 
 
@@ -191,11 +196,18 @@ def upsert_root_readme(text: str, skills: list[dict[str, str]]) -> tuple[str, li
         end += 1
     rows = lines[header + 2 : end]  # skip header and separator
 
-    widths = [0, 0]
-    for row in rows:
-        cells = [c.strip() for c in row.strip().strip("|").split("|")]
-        if len(cells) >= 2:
-            widths = [max(widths[0], len(cells[0])), max(widths[1], len(cells[1]))]
+    # Pad to the column the table is aligned to — the separator's dash runs.
+    # The longest cell is the wrong measure: one overlong summary would widen
+    # every row we write, and re-pad rows whose text never changed.
+    separator = cells(lines[header + 1])
+    if len(separator) >= 2 and all(re.fullmatch(r":?-+:?", c) for c in separator[:2]):
+        widths = [len(separator[0]), len(separator[1])]
+    else:
+        widths = [0, 0]
+        for row in rows:
+            row_cells = cells(row)
+            if len(row_cells) >= 2:
+                widths = [max(widths[0], len(row_cells[0])), max(widths[1], len(row_cells[1]))]
 
     kept = [r for r in rows if f"skills/{AUTHOR}/" not in r]
     changed = []
@@ -203,7 +215,9 @@ def upsert_root_readme(text: str, skills: list[dict[str, str]]) -> tuple[str, li
         link = f"[`{s['name']}`](skills/{AUTHOR}/{s['name']}/SKILL.md)"
         row = f"| {link.ljust(widths[0])} | {s['summary'].ljust(widths[1])} |"
         previous = next((r for r in rows if f"skills/{AUTHOR}/{s['name']}/" in r), None)
-        if previous is None or previous.rstrip() != row.rstrip():
+        if previous is not None and cells(previous) == cells(row):
+            row = previous  # same content: keep the line byte for byte
+        else:
             changed.append(s["name"])
         kept.append(row)
 
