@@ -260,6 +260,17 @@ insertion above it invalidates it, but a *deletion* silently retargets it to
 whatever moved into the slot. It still resolves — to the wrong thing. Three
 citations in eleven were wrong this way in a single phase.
 
+**Resolving is not aiming, so report two numbers.** A citation *rots* when it
+no longer resolves, or resolves to the wrong thing. It is *mis-aimed* when it
+resolves to exactly what it names and that thing does not exercise the rule —
+most often a cited test that stays green when the rule is broken. Symbol
+anchoring drives rot toward zero and does nothing for aim: in one trial every
+test citation resolved (0% rot) while 4 of 17 cited a test that could not fail
+for its rule. Check aim with 2c's question, *how does this go red*, and for a
+`foundational` rule, run the cited test against a copy with the rule broken
+where that is practical. Say which citations were aimed by running and which
+by reading.
+
 Report a wrong citation as a finding, and where a document cites by line at
 all, say so once: the durable fix is to cite a **symbol, a quoted test
 description, or a path**, not a line, so that a rename invalidates the
@@ -724,7 +735,7 @@ four seconds to skip and cost you an explicit lie to fake.
 
 ```
 Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
-             11 citations resolved, 3 wrong (see findings) — 27% rot
+             11 citations: 3 rot (27%); of 8 resolving, 1 mis-aimed (run)
          2c: 3 invariants, each with a failing example
          2d: NAMESPACE +2, both extend an existing verb
          2f: docs 4 files, largest 312 lines (>300 — flagged);
