@@ -20,8 +20,13 @@ them. A decision recorded in prose acquires authority it has not earned, and
 the person paying for the resulting complexity never gets a chance to object.
 This review is that chance.
 
-**Output a short report. Twenty reviewable lines beat a seven-hundred-line
-document — the long document is how the problem started.**
+**Output a report whose decisions can be read in twenty lines.** A
+seven-hundred-line document is how the problem started, and a review that
+reproduces one has failed however right it is. The report can run longer than
+twenty lines, because the evidence has to live somewhere: citations,
+run-or-read labels, the clean block. What must stay short is the skeleton, the
+bold one-line findings plus `Decide these`, and it must be readable on its
+own. See *Report format*.
 
 ## This review changes nothing
 
@@ -108,7 +113,7 @@ blocker.
 
 ## Step 3 — Pick a depth
 
-Every depth runs Part 1 and all five tension checks. What changes is the
+Every depth runs Part 1 and all six tension checks. What changes is the
 **radius** — this range, or the whole project — and whether the architecture
 itself is on the table. **Depth is never permission to look less carefully.**
 A check run shallowly and reported clean is the one failure this review
@@ -190,9 +195,10 @@ user can send you up or down in one word.
 | 2c invariants | those the phase touched | those the phase relies on | all, and does each still earn its keep |
 | 2d surface | the diff | + does it duplicate existing surface | + should existing surface shrink |
 | 2e prohibitions | the range | the range and adjacent code | the range, and the prohibitions themselves |
-| 2f document health | size and dead pointers | + tier distribution | all four questions |
+| 2f document health | size and dead pointers | + tier distribution, enforcement split, movement | all four questions |
 | Part 3 | skip | only where the phase strained a rule | required |
 | Part 4 | tiers the phase touched | all tiers the phase relied on | all tiers |
+| Part 5 | if the range remediates a review | same | same |
 
 At depth 1 the architecture is settled: report drift against it, do not
 relitigate it. At depth 3 the architecture is the subject.
@@ -259,6 +265,17 @@ insertion above it invalidates it, but a *deletion* silently retargets it to
 whatever moved into the slot. It still resolves — to the wrong thing. Three
 citations in eleven were wrong this way in a single phase.
 
+**Resolving is not aiming, so report two numbers.** A citation *rots* when it
+no longer resolves, or resolves to the wrong thing. It is *mis-aimed* when it
+resolves to exactly what it names and that thing does not exercise the rule —
+most often a cited test that stays green when the rule is broken. Symbol
+anchoring drives rot toward zero and does nothing for aim: in one trial every
+test citation resolved (0% rot) while 4 of 17 cited a test that could not fail
+for its rule. Check aim with 2c's question, *how does this go red*, and for a
+`foundational` rule, run the cited test against a copy with the rule broken
+where that is practical. Say which citations were aimed by running and which
+by reading.
+
 Report a wrong citation as a finding, and where a document cites by line at
 all, say so once: the durable fix is to cite a **symbol, a quoted test
 description, or a path**, not a line, so that a rename invalidates the
@@ -269,6 +286,22 @@ The report is read against the commit range in its own heading, usually within
 the hour, so the line number cannot rot before it is used and it saves the
 reader a search. The symbol is what makes the citation still meaningful if
 they come back to it next week.
+
+#### Quantifiers are claims about scope
+
+Anchoring a citation fixes *where* it points. It does nothing for what the
+sentence around it claims, and that is where rot went once citations stopped
+rotting: four wrong claims in three commits, each next to a citation that
+resolved correctly.
+
+- **"only", "never", "always", "every", "unconditionally"** are claims about
+  the whole repository. A read of the cited file cannot support one. Verify
+  each with a repository-wide search, as a claim in its own right — "the only
+  two calls" was four.
+- **A sentence describing what a function does to its inputs** — "has
+  already populated every row", "never leaves the function" — is checked
+  against the function body, not against the function's name. One such claim
+  was contradicted two lines into the function it described.
 
 #### Reading is not verification
 
@@ -308,18 +341,42 @@ two need opposite fixes.
 
 For each prohibition in the invariant list, find the test, notebook cell, or
 CI check that goes red when it is violated. Report the ones with none.
-**A prohibition with no such example is a wish.**
+**A prohibition with no such example is a wish** — with one exception. A
+prohibition on *future* code (*"resist adding a mode argument"*, *"code that
+answers a different question moves out"*) cannot have an example, because
+there is nothing to run until someone writes the thing forbidden. Do not ask
+for one. It is vigilant by construction, and it belongs in the sweep below.
+If you can name the forbidden form concretely, though, it is not this
+exception: a named form can be swept for.
 
 Then the harder half: for those that *do* have one, does it demonstrate the
 invariant itself or a side effect of it? An example can exercise exactly the
 right code path and still teach the wrong thing — it passes for a reason the
 reader never sees.
 
+And does it depend on **a value someone else owns**? A test asserting that
+input `X` is rejected is pinned to `X` being rejectable. If an upstream
+package, a vendor specification or a config default can reclassify `X`, the
+test goes red on a *fix* rather than a regression. In one trial an upstream
+release lifted a limit and four tests broke, all using the out-of-range index
+as a sentinel for "invalid", while a boundary test written with no hardcoded
+bound followed the new range unchanged. Prefer the example no external change
+can reclassify.
+
 **Apply that same test to any example you propose.** When you suggest an
 example for an invariant that lacks one, you must say *how it goes red* —
 what specifically breaks it, and why nothing else would produce that failure.
 A proposed example is a claim like any other, and it is wrong in exactly the
 way this check exists to catch more often than it looks.
+
+Saying so has not been enough: the miss below recurred in a later trial,
+after this paragraph existed, and took two more attempts to fix. So make it
+mechanical. **Name the likeliest wrong implementation** — a faithful copy, a
+hardcoded value, a second path, a sentinel someone else owns — and check the
+proposed example fails against it. Where running is practical, run it,
+against a throwaway copy under the scratch path, never the working tree.
+Report which you did: *"fails against a local copy (run)"* and *"should fail
+against a local copy (read)"* are different confidence levels.
 
 The trial's own miss: for *"this is implemented in exactly one place"*, the
 review proposed asserting that the local function equals the delegate across
@@ -328,6 +385,25 @@ cannot tell delegation from duplication — it passes either way. What actually
 goes red is the raised condition carrying the delegate's error as its parent,
 which a copy has nothing to populate. If you cannot name the thing that
 breaks, you have proposed a wish to replace a wish.
+
+#### Sweep the vigilant rules yourself
+
+A test of known cases cannot notice a *new* case. For every vigilant
+`foundational` rule (2f's list, or classify the ones this depth covers),
+**do the search the tests cannot**: look for a new instance of the violation.
+Search the range at every depth. At depth 2 and above, search the whole
+source as well, because a vigilant rule's earlier violations had nothing to
+catch them either.
+
+This is the check that paid off on a mature project: a `foundational`
+one-formatter rule, two cited tests, both passing — and a third formatter in a
+plotting file neither test looked at, collapsing a quarter of a large plate
+into one `NA` category. It had shipped. The tier said the rule mattered; only
+the enforcement kind said nobody was watching.
+
+When the sweep finds one, the obvious fix is **to armor the rule**, not only
+to fix the instance: propose the source sweep or constraint that would have
+caught it, held to the standard above.
 
 ### 2d. New surface area
 
@@ -370,18 +446,63 @@ wish as an invariant with no failing example.
 wc -l <intent docs>
 grep -c '^### ' <the rules document>          # rule count
 grep -c 'foundational' <the rules document>   # tier distribution
+grep -ciE '\*\*(armored|vigilant)' <the rules document>   # enforcement, if recorded
 ```
 
-Four questions, all mechanical:
+Four questions, each with a mechanical start:
 
 - **Size.** Is any document past the size its own project names as the point
   to split? Past roughly 300 lines people stop re-reading and start grepping,
   and a rule found by grep is read without its reasoning. Report the largest
   and the threshold.
-- **Tier distribution.** If more than about two-thirds of the rules are
-  `foundational`, **the tier has stopped discriminating.** Report the
-  distribution as one finding rather than arguing the rules one at a time —
-  at that ratio the problem is the marking, not any individual mark.
+- **Tier distribution, and what it is measuring.** Count the tiers, then
+  place the project *before* reading the number, because the same ratio means
+  opposite things in two populations:
+
+  | The tiers were | A high `foundational` share means | Report |
+  | --- | --- | --- |
+  | Predicted before the code, or the project is in its first few phases | Importance marked as confidence — **the tier has stopped discriminating** | Past about two-thirds: the distribution, as one finding rather than arguing the rules one at a time. At that ratio the problem is the marking, not any mark |
+  | Recovered from a codebase that has been through many phases, or promoted one at a time on evidence | **Survivorship.** The rules that were not load-bearing have already been deleted, and `in question` rules lock in as phases lean on them. The share only climbs, so past some age it mostly reports that the project is old | Do not argue the ratio. Report the enforcement split below, with the vigilant rules by name |
+
+  The tiered document's first line should say which (`set-foundation` writes
+  *"predicted before the code"* or *"recovered from the code at <ref>"*).
+  Where it does not, place the project from the history — release tags,
+  concepts deleted along the way, whether the `foundational` rules cite
+  guards older than the document — and say which signals you used. **What
+  places the project is the age of the code the rules came from, not the age
+  of the tiers.** A mature codebase tiered in one sitting this morning is the
+  second row.
+
+  **The enforcement split.** For each `foundational` rule, is it *armored* —
+  would a violation nobody anticipated still go red — or *vigilant*, defended
+  only by tests of the cases someone thought of? Use the word the rule
+  records if it records one; otherwise apply the test yourself: **write the
+  likeliest violation in a file that does not exist yet, and ask whether
+  anything goes red.** A source sweep or a type constraint catches it; a test
+  of known inputs does not. A prohibition on future code is vigilant by
+  construction — count those separately so nobody reads them as missing
+  tests. Report *"A of N foundational rules armored"* and name the vigilant
+  ones. Unlike the ratio, the vigilant share **falls** as a project matures,
+  because absorbing a rule into the build is what maturing looks like, and it
+  points at the population where a real violation ships with every test
+  green. 2c spends its attention there.
+
+  **Movement**, where the tiers are old enough to have any. What most
+  distinguishes a healthy rule set is whether its tiers still move — promoted,
+  demoted, armored:
+
+  ```bash
+  git log -p --format='%h %as' -- <the rules document> \
+    | grep -E '^([0-9a-f]{7,} |[-+]`(foundational|in question|contract)`)'
+  ```
+
+  Read the pairs: a `-`/`+` pair with different tiers is a move, a pair with
+  the same tier is only a date changing, and a lone `+` is a new rule.
+  Armoring does not show here — check the rules' enforcement lines in the
+  same log. A high share with tiers still moving is fine. **Zero movement
+  across many phases is the smell, whatever the ratio** — the tiers have
+  frozen at the moment of least information. Say how many phases the count covers; three
+  weeks of tiers cannot have moved much.
 - **Dead pointers.** Does every document the agent file points at exist, and
   does every document say when to read it? A pointer to something absent
   teaches the reader that the pointers are decorative.
@@ -397,7 +518,9 @@ this review that reports against it.**
 ## Part 3 — The counterfactual pass
 
 *Depth 3 always; depth 2 only where the phase visibly strained against a rule.
-Skip at depth 1.*
+Skip at depth 1.* Strain is a workaround somebody chose. An accidental
+violation is a 2c finding, and a carve-out written alongside its rule is
+scope; neither triggers this pass (see *Part 4 — Demote*).
 
 An architecture document written before the code existed is a prediction. This
 pass makes each prediction the phase strained against re-earn its place. The
@@ -481,19 +604,49 @@ it, the tiers freeze at the moment of least information.
 | An `in question` rule that other rules have come to depend on — it cannot be dropped now without touching them | → `foundational`, and say which rules pinned it |
 | A `contract` the code actually enforces | → `foundational`, or stop enforcing it |
 
-**If 2f found the distribution itself skewed, stop here.** Proposing five
-individual promotions into a set that is already two-thirds `foundational`
-makes the marking less informative, not more. Report the distribution and let
-the user re-cut it.
+**If 2f found the marking itself skewed — importance recorded as
+confidence — stop here.** Proposing five individual promotions into a set
+that is already two-thirds `foundational` for that reason makes the marking
+less informative, not more. Report the distribution and let the user re-cut
+it.
+
+**If 2f placed a high share as survivorship, promote as normal.** An
+`in question` rule locking in after phases have leaned on it is the lifecycle
+tiers exist to record, not a symptom. The evidence bar below does not change.
 
 ### Demote
 
 | What you saw | Suggest |
 | --- | --- |
-| A `foundational` rule this phase worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
-| A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract` |
+| A `foundational` rule this phase *knowingly* worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
+| A `foundational` rule violated *unknowingly* — the 2c sweep found an instance nobody chose | **Not a demotion.** The rule held its value; its enforcement failed. → armor it, and report the violation as a tension finding |
+| A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract`. Not for a prohibition on future code, which cannot have one — leave its tier alone |
 | A rule whose stated failure has never happened and which you cannot construct a case for | → `in question` |
 | A `foundational` rule nothing in the range could have violated | → probably `contract`; it is describing style, not constraining behaviour |
+
+The first two rows are easy to confuse, and the difference decides the
+remedy. **A workaround is a choice; a violation is an accident.** Someone who
+routes around a rule is telling you what it costs, and that is evidence about
+the tier. Someone who breaks a rule without noticing is telling you nothing
+about the rule and everything about its enforcement. If the violation
+reproduces the very failure the rule was written to prevent, that is the rule
+earning its tier, not losing it.
+
+Likewise, **a carve-out written by the same range that wrote the rule is
+scope, not strain.** Nothing leaned on the rule before the carve-out existed,
+so there is nothing to have strained. This matters most in a circular range,
+where every scope note arrives alongside its rule.
+
+### Armor
+
+Enforcement moves too, and it is recorded here because it is evidence about a
+rule — but it is **not a tier move**, and the report should not make it look
+like one:
+
+| What you saw | Record |
+| --- | --- |
+| The range added a check that catches a novel violation of a rule that had only known-case tests | `armored` — and the rule's enforcement line should now say so |
+| The range removed or narrowed such a check | `unarmored` — usually by accident, so it is also a 2c finding |
 
 Report each as one line, in the user's own terms — the tier was their call,
 so the finding is evidence, not a verdict:
@@ -503,6 +656,8 @@ promote  "Units convert at the boundary"  in question -> foundational
          3 phases relied on it; test-units.R:40 now goes red when violated
 demote   "One well-address formatter"     foundational -> in question
          this phase added a second path at wells.R:210 rather than extend it
+armored  "Grid identity"                  (stays foundational)
+         test-grid.R:12 now sweeps R/ for LETTERS[ outside `.well_row()`
 ```
 
 Two constraints:
@@ -513,6 +668,32 @@ Two constraints:
 - **Do not promote on survival alone.** A rule nothing has tested has not
   earned anything; it has merely not been in the way. Cite the phases that
   leaned on it, or leave the tier where it is.
+
+## Part 5 — A previous round's fixes
+
+*Every depth, whenever the range remediates an earlier review* — commit
+messages that cite one, or an earlier report sitting in the scratch path.
+
+**A review reports instances; a fix has to address the class.** So do not
+check that the named instances were fixed. That is the one thing the author
+certainly did. Check whether **other instances of the same class** survive:
+
+1. For each fix, state the defect's general form in one line — not "line 40
+   of the README says three", but "a count of defects restated outside the
+   defects document".
+2. Search for that form repository-wide.
+3. **Include generated output** — `man/`, rendered notebooks, built docs,
+   anything nobody edits by hand and therefore nobody greps.
+
+In the trials that motivated this, every round of remediation introduced at
+least one error the next round caught. The clearest case: a review listed
+three files carrying a retired rule, the author fixed those three, and four
+more survived, one of them in the shipped manual. One commit later, the same
+shape again with a number updated in one file and stale in four. The worst
+surviving instance lived in generated output both times.
+
+Report survivors as tension findings. In the clean block, the scope: how many
+fixes, each swept for its class, where.
 
 ## Report format
 
@@ -525,8 +706,9 @@ _Depth N — <the signal that chose it>_
 ...
 
 ### Tension
-**<one-line finding>** — <what is wrong, and the evidence>
-  <symbol> (<file:line>). Suggested: <the smallest change that resolves it>
+**<one-line finding, the whole claim in one sentence>**
+  <the evidence> <symbol> (<file:line>) (run | read)
+  Suggested: <the smallest change that resolves it>
 ...
 
 ### Counterfactual   <!-- depth 2-3 only -->
@@ -539,6 +721,8 @@ promote  "<rule>"  <from> -> <to>
          <the evidence from this phase>
 demote   "<rule>"  <from> -> <to>
          <the evidence from this phase>
+armored  "<rule>"  (tier unchanged)
+         <the check that now catches a novel violation>
 
 Clean    <check>: <what was examined, counted> ...
 Skipped  <check> — <why, usually the depth>
@@ -551,6 +735,15 @@ Skipped  <check> — <why, usually the depth>
 Rank tension findings by what they cost if left: a wrong model taught to
 future readers outranks a stale sentence.
 
+**Write for two readings.** The first reads only the bold lines and `Decide
+these`, and should come away knowing everything that matters, in about twenty
+lines. The second goes down into the indented evidence for the one finding
+they doubt. So the bold line carries the whole claim: *"Grid identity has a
+live violation in the plot path"*, not *"Grid identity"*. Evidence is
+indented beneath it, never run into the same sentence. A report laid out this
+way can be a hundred and fifty lines long and still take a minute to use; one
+that buries its claims in paragraphs takes longer at forty.
+
 ### The clean block
 
 This block is **for the record, not for reading.** The user reads `Decide
@@ -560,12 +753,14 @@ four seconds to skip and cost you an explicit lie to fake.
 
 ```
 Clean    2a: 4 claims in ARCHITECTURE.md §Rounding, §Units, verified in source
-             11 citations resolved, 3 wrong (see findings) — 27% rot
+             11 citations: 3 rot (27%); of 8 resolving, 1 mis-aimed (run)
          2c: 3 invariants, each with a failing example
          2d: NAMESPACE +2, both extend an existing verb
          2f: docs 4 files, largest 312 lines (>300 — flagged);
-             tiers 4/11 foundational
+             tiers 10/13 foundational, recovered at v0.5.0 — survivorship;
+             3 armored, 7 vigilant (5 swept in 2c, 2 future-code prohibitions)
          4:  no tier drift — nothing leaned on an `in question` rule
+         5:  3 fixes from the last review, each class swept incl. man/
 Skipped  2b project-wide, Part 3 — depth 1
 ```
 
@@ -629,9 +824,14 @@ A PR opened over an unanswered question buries the question.
 
 - **Not a code review.** Correctness, tests and performance belong elsewhere.
   This is about what the work *decided*.
-- **Not a rubber stamp.** "No tension found" across five checks on a real phase
+- **Not a rubber stamp.** "No tension found" across six checks on a real phase
   usually means the checks were run shallowly. Say which checks were shallow
   rather than reporting clean.
+- **Not a guess.** When the repository cannot answer something — whether a
+  decision was put to the user, why a guard exists — say so in those words:
+  *"I cannot tell from the repository whether this was put to you."* Across
+  four trials this was the habit that made the reports trustworthy, and it is
+  easy to train out by accident by rewarding confident answers. Keep it.
 - **Not license to refactor.** Report, then let the user choose — see
   *This review changes nothing*.
 - **Not a plan.** It surfaces what needs deciding; it does not decide, and it
