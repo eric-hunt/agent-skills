@@ -393,6 +393,23 @@ can, and the comparison between two of them is mechanical:
 | `agreed:` | When the author and the agent settled this wording together. | **See the integrity rule below** |
 | `altered:` | When the wording was last changed *without* a fresh agreement. | An agent sets this every time it touches the rule |
 
+**`created:` dates the claim, not the wording.** In Mode B you will often
+tier a rule that already existed in untiered prose, reworded to fit the
+format. Its `created:` is when that claim first appeared in any document in
+the repository, not the day you tiered it:
+
+```bash
+git log -S'<distinctive phrase from the old wording>' --format='%as %h' --reverse -- '*.md' | head -1
+```
+
+A rewording at tiering time is exactly what `altered:` and `agreed:` exist to
+record, so a rule can carry an old `created:` and today's `agreed:` without
+contradiction. Use the tiering date only when the claim is new, meaning you
+can find no document that stated it before, and say so to the user. Dating
+every recovered rule to the day of the session makes a mature rule set look a
+few hours old, which is the one misreading a later review is most likely to
+make.
+
 Omit a field that does not apply rather than inventing a value. Three
 properties make the extra line worth it:
 
