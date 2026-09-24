@@ -499,7 +499,9 @@ this review that reports against it.**
 ## Part 3 — The counterfactual pass
 
 *Depth 3 always; depth 2 only where the phase visibly strained against a rule.
-Skip at depth 1.*
+Skip at depth 1.* Strain is a workaround somebody chose. An accidental
+violation is a 2c finding, and a carve-out written alongside its rule is
+scope; neither triggers this pass (see *Part 4 — Demote*).
 
 An architecture document written before the code existed is a prediction. This
 pass makes each prediction the phase strained against re-earn its place. The
@@ -597,10 +599,24 @@ tiers exist to record, not a symptom. The evidence bar below does not change.
 
 | What you saw | Suggest |
 | --- | --- |
-| A `foundational` rule this phase worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
+| A `foundational` rule this phase *knowingly* worked around, special-cased, or deferred | → `in question`, and hand it to Part 3 |
+| A `foundational` rule violated *unknowingly* — the 2c sweep found an instance nobody chose | **Not a demotion.** The rule held its value; its enforcement failed. → armor it, and report the violation as a tension finding |
 | A `foundational` rule with no example that goes red, several phases in | → write the example, or → `contract`. Not for a prohibition on future code, which cannot have one — leave its tier alone |
 | A rule whose stated failure has never happened and which you cannot construct a case for | → `in question` |
 | A `foundational` rule nothing in the range could have violated | → probably `contract`; it is describing style, not constraining behaviour |
+
+The first two rows are easy to confuse, and the difference decides the
+remedy. **A workaround is a choice; a violation is an accident.** Someone who
+routes around a rule is telling you what it costs, and that is evidence about
+the tier. Someone who breaks a rule without noticing is telling you nothing
+about the rule and everything about its enforcement. If the violation
+reproduces the very failure the rule was written to prevent, that is the rule
+earning its tier, not losing it.
+
+Likewise, **a carve-out written by the same range that wrote the rule is
+scope, not strain.** Nothing leaned on the rule before the carve-out existed,
+so there is nothing to have strained. This matters most in a circular range,
+where every scope note arrives alongside its rule.
 
 ### Armor
 
