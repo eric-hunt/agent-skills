@@ -463,7 +463,10 @@ Four questions, each with a mechanical start:
   *"predicted before the code"* or *"recovered from the code at <ref>"*).
   Where it does not, place the project from the history — release tags,
   concepts deleted along the way, whether the `foundational` rules cite
-  guards older than the document — and say which signals you used.
+  guards older than the document — and say which signals you used. **What
+  places the project is the age of the code the rules came from, not the age
+  of the tiers.** A mature codebase tiered in one sitting this morning is the
+  second row.
 
   **The enforcement split.** For each `foundational` rule, is it *armored* —
   would a violation nobody anticipated still go red — or *vigilant*, defended
