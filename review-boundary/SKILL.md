@@ -1,9 +1,9 @@
 ---
 name: review-boundary
-description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report and changes nothing. Pairs with set-foundation, which lays down the tiered rules this review checks against.
+description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report, committed on the branch and removed before the merge, and changes nothing it reviews. Pairs with set-foundation, which lays down the tiered rules this review checks against.
 metadata:
   author: Eric Hunt
-  version: "1.1"
+  version: "1.2"
   summary: Read-only review at a phase boundary: what was decided without asking, and where the design strained
 license: MIT
 ---
@@ -43,18 +43,41 @@ the project to spend its phases on wording. Before reporting anything, ask:
   test that keeps a document's number in sync with another document — delete
   the number.
 
-## This review changes nothing
+## This review changes nothing it reviewed
 
-Read-only: no edits, no fixes, no commits, no PR. A review that fixes things
-on the way through fuses finding and fix, and the user never gets the choice
-this review exists to give them. Fixes come after the user has read the report.
+No edits to the code or documents under review, no fixes, no PR. A review that
+fixes things on the way through fuses finding and fix, and the user never gets
+the choice this review exists to give them. Fixes come after the user has read
+the report.
 
-Nominate one gitignored scratch path up front for notes and the report, and
-say where it is:
+Working notes and grep output go in one gitignored scratch path; nominate it up
+front:
 
 ```bash
 git check-ignore -q temp/ && echo "temp/ is ignored"
 ```
+
+**The finished report is the one file the review leaves.** Write it to
+`docs/review-<YYYY-MM-DD>-<phase>.md` — or wherever the project's agent file
+says — and, once the review is done, commit it on the branch. Remove it in its
+own commit before the PR merges. The findings then stay in history beside the
+work that answered them, readable by anyone, rather than on one machine's
+scratch path. Two details make or break this:
+
+- **It needs a real merge.** A squash collapses the add and the delete into a
+  no-op, and the report is unrecoverable once the branch is gone. On a project
+  that squashes, keep the report in scratch and say so.
+- **Plain `git log` will not find it**, because the file never exists on the
+  trunk's first-parent line:
+
+  ```bash
+  git log --full-history --diff-filter=A --format='%as %h %s' -- 'docs/review-*.md'
+  git show <hash>:<path>
+  ```
+
+A deferred `Decide these` item needs somewhere to live after the report is
+deleted — the project's roadmap or equivalent. If there is none, say so, so
+the review does not silently become the only record of an open question.
 
 ## Step 1 — Scope the range
 
@@ -145,6 +168,8 @@ line each:
 - **Include the small ones** — defaults, names, warn versus error. They
   accumulate unreviewed.
 - **Exclude** anything discussed and accepted, or forced by an existing rule.
+  A commit message or an `agreed:` date recording the author's acceptance
+  counts; cite it. Where the repository cannot say, report it as inferred.
 - If a decision now looks wrong, say so rather than defending it.
 
 ## Part 2 — The tension pass
@@ -194,8 +219,11 @@ For each `foundational` rule the depth covers:
 
 - **Is there anything that goes red when it is violated?** If not, report it —
   unless it is a prohibition on code nobody has written yet ("resist adding a
-  mode argument"), which cannot have an example. If you can name the forbidden
-  form concretely, it can be swept for, so it is not that exception.
+  mode argument"), which cannot have an example. That exception ends only
+  where a sweep would catch the forbidden form's **likeliest variant**, not just
+  its spelling: "no `on_mismatch` argument" is a name a rename walks past, so
+  it stays a prohibition; "no `LETTERS[` outside `.row_label()`" is a
+  construct, so sweep for it.
 - **Sweep the vigilant ones yourself.** A test of known cases cannot notice a
   new case. For each rule marked (or that you judge) `vigilant`, search the
   source for a new instance of the violation. This is the check most likely to
@@ -240,6 +268,11 @@ wc -l <intent docs>
 - **Accretion.** Incidents, revision history, restated counts, rationale for
   wording rather than for the rule — per *The bar for a finding*, propose
   deleting them.
+- **A rule in the wrong document.** A past-tense sentence that would still
+  change someone's behaviour tomorrow — "we moved X out; do not move it back",
+  in a changelog or a roadmap's shipped list — is a rule filed as history.
+- **A rule stated twice.** The likeliest copies are in the agent file, and in
+  the tier definitions. Two copies of a rule will disagree; report the second.
 - **Dead pointers and orphans.** A pointer to something absent, or a document
   nothing sends a reader to.
 
@@ -278,6 +311,7 @@ confidence; if this review does not say so, the tiers freeze.
 | A `foundational` rule the phase *knowingly* worked around | → `in question`, and hand it to Part 3 |
 | A `foundational` rule violated *unknowingly* (2c found it) | **Not a demotion** — the rule held; its enforcement failed. Armor it |
 | A `foundational` rule describing style, which nothing could violate in a way that breaks behaviour | → `contract` |
+| A `foundational` rule the phase found violated and **recorded** as a defect, without working around it | No move. It waits on the decision that resolves it; put that in `Decide these` |
 | A `contract` the code enforces by test | Fine — a test is allowed to keep code organised. No move |
 
 A check that now catches a novel violation is `armored`, not a tier move;
@@ -331,9 +365,11 @@ line cannot rot first. Rank findings by what they cost if left: a wrong model
 taught to future readers outranks a stale sentence.
 
 **The clean block** is for the record: name the scope examined, never the
-verdict ("4 claims in §Rounding, verified in source", not "no drift"). List
-every skipped or shallow check. If it runs longer than the findings, compress
-it; if it is all there is, say *"Nothing to decide"* in the first line.
+verdict ("4 claims in §Rounding, verified in source", not "no drift").
+**One line per check, holding counts, not lists** — the denominator is what
+makes it falsifiable, and a list turns it into a second report. Every skipped
+or shallow check gets its own `Skipped` line. If it is all there is, say
+*"Nothing to decide"* in the first line.
 
 ## After the report
 
