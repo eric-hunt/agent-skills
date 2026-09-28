@@ -1,9 +1,9 @@
 ---
 name: set-foundation
-description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
+description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down, and plan-next, which keeps the roadmap this sets up in step with the tracker.
 metadata:
   author: Eric Hunt
-  version: "1.4"
+  version: "1.5"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -330,18 +330,18 @@ Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   in `ARCHITECTURE.md`, with the date.
 - **When you find a defect or plan future work** — open an issue labelled
   `bug`, `enhancement` or `question`, never a note in `ARCHITECTURE.md`.
-  Before planning what comes next, `gh issue list`.
+- **Before planning what comes next** — run `plan-next`. It brings
+  `docs/ROADMAP.md` up to date with the tracker and puts the order to the user.
 ```
 
-Without a tracker, the last line reads *"When recording a defect —
+Without a tracker, the defect line reads *"When recording a defect —
 `docs/DEFECTS.md`, never `ARCHITECTURE.md`"* instead.
 
 Name the moment, not the tool. Point, never restate — one line each. A
 pointer may state the *procedure* (open an issue, labelled `bug`); it must not
-restate a *rule*. Only
-for skills and documents the project has. The pointer names the skill; the
-skill never names the project. Put them to the user: they bind future
-sessions.
+restate a *rule*. Only for skills and documents the project has. The pointer
+names the skill; the skill never names the project. Put them to the user:
+they bind future sessions.
 
 ## Step 4 — Hand off
 
