@@ -3,7 +3,7 @@ name: review-boundary
 description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report, committed on the branch and removed before the merge, and changes nothing it reviews. Pairs with set-foundation, which lays down the tiered rules this review checks against.
 metadata:
   author: Eric Hunt
-  version: "1.2"
+  version: "1.3"
   summary: Read-only review at a phase boundary: what was decided without asking, and where the design strained
 license: MIT
 ---
@@ -76,8 +76,9 @@ scratch path. Two details make or break this:
   ```
 
 A deferred `Decide these` item needs somewhere to live after the report is
-deleted — the project's roadmap or equivalent. If there is none, say so, so
-the review does not silently become the only record of an open question.
+deleted — an issue labelled `question`, or the roadmap where the project has no
+tracker. If there is neither, say so, so the review does not silently become
+the only record of an open question.
 
 ## Step 1 — Scope the range
 
@@ -101,7 +102,9 @@ ls docs/ doc/ adr/ docs/adr/ rfcs/ design/ 2>/dev/null
 You are looking for **the intent documents** (architecture notes, ADRs, the
 agent instruction file), **the rules** (prohibitions, standing invariants —
 tiered `foundational` / `in question` / `contract` if the project uses
-`set-foundation`), and **the public surface**:
+`set-foundation`), **where defects and future work live** — the issue
+tracker (`gh issue list --state all`), or `docs/DEFECTS.md` and
+`docs/ROADMAP.md` where there is none — and **the public surface**:
 
 | Project shape | Diff this |
 | --- | --- |
@@ -275,6 +278,12 @@ wc -l <intent docs>
   the tier definitions. Two copies of a rule will disagree; report the second.
 - **Dead pointers and orphans.** A pointer to something absent, or a document
   nothing sends a reader to.
+- **The tracking convention.** Follow whichever the project uses. Report it
+  when there is none — defects noted in the rules document, or nowhere — or
+  when one item lives in both (a `DEFECTS.md` entry that is also an issue),
+  and name the fix: re-run `set-foundation`, which carries the migration. A
+  project on the fallback whose repository has a reachable tracker is worth
+  one line, not a finding.
 
 Do not argue the `foundational` share. On a mature project it is high because
 what was not load-bearing has been deleted.
@@ -356,6 +365,11 @@ promote | demote | armored  "<rule>"  <from> -> <to>
 Clean    <check>: <what was examined, counted>
 Skipped  <check> — <why>
 
+### File these
+bug          "<title>"  — <one line of evidence>
+enhancement  "<title>"
+question     "<title>"  — <a deferred Decide-these item>
+
 ### Decide these
 1. <question, options, recommendation>
 ```
@@ -379,6 +393,12 @@ Sort every finding into one of two piles:
   body only. Do not ask a question you know the answer to.
 - **Needs the user** — two defensible options, or a cost only they can weigh.
   These go in `Decide these`, answerable in a word.
+
+Anything real that this phase will not fix — a defect found on the way, work
+the review shows is next — goes in **`File these`**, as a proposed issue with a
+title and label, or a proposed `DEFECTS.md`/`ROADMAP.md` entry on the fallback.
+The review files nothing itself: opening an issue is visible outside the
+repository, so it waits for the user's word like any fix.
 
 Three decisions is a lot. If there are more, sort harder.
 
