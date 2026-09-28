@@ -14,7 +14,8 @@ An issue tracker is flat, so the order work is picked up in lives in a short
 `docs/ROADMAP.md`. That list is a copy of tracker state, and a copy goes stale
 between phases: issues close with the PRs that fixed them, new ones are opened
 on the way, a question gets answered in passing. Nobody notices a stale `Next`
-until they pick up a closed item, and nobody ever notices a stale `Door open`.
+until they pick up a closed item, and nobody ever notices a stale
+`Open questions`.
 
 **The deliverable is an agreed order, not a tidy file.** The mechanical half —
 closed items off, new questions on — takes a minute. The half worth running
@@ -78,9 +79,9 @@ repository's issue, not this one's #16.
 | Saw | Is |
 | --- | --- |
 | A listed issue, now closed | **Obvious** — drop it |
-| An open `question` not on `Door open` | **Obvious** — add it |
+| An open `question` issue not on `Open questions` | **Obvious** — add it |
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
-| A `Door open` issue no longer labelled `question` | Decided — it goes to `Next`, or it was closed |
+| An issue on `Open questions` no longer labelled `question` | Decided — it goes to `Next`, or it was closed |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
 | A short title that no longer matches its issue | Only if the issue's **scope** changed. A paraphrase is the point of a short title |
@@ -99,7 +100,7 @@ Next
 3. #38  sync --dry-run                          was 2
 dropped  #44 — closed by #50
 
-Door open
+Open questions
 - #53  should sync follow symlinks?             new
 
 Decide
@@ -111,7 +112,7 @@ reason in a few words — what it depends on, what it unblocks, what the last
 phase left warm. Do not impose a ranking rule (bugs first, oldest first); the
 order is theirs.
 
-- **Raise a `Door open` question only with evidence** that the last phase
+- **Raise an open question only with evidence** that the last phase
   changed its answer. Re-asking every question every phase trains the user to
   skip the list.
 - **Do not grow `Next` to hold every open issue.** An issue off the list is not
@@ -133,7 +134,7 @@ _The order open issues get picked up in. `gh issue list` is the full set._
 
 1. #41 — the config loader ignores `XDG_CONFIG_HOME`
 
-## Door open
+## Open questions
 
 - #53 — should `sync` follow symlinks?
 ```
