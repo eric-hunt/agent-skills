@@ -194,9 +194,9 @@ Two things stay in documents either way:
 - **Ordering.** Issues are flat. A short `docs/ROADMAP.md` — or a milestone —
   holds the sequence: issue numbers with short titles under `Next`, in the
   order they get picked up, and optionally the open `question` issues under
-  `Door open`. Nothing else. Questions are the issues nobody is working on,
-  so they are the ones forgotten; listing them in the file read at planning
-  time brings them up without a `gh issue list --label question`.
+  `Open questions`. Nothing else. Questions are the issues nobody is working
+  on, so they are the ones forgotten; listing them in the file read at
+  planning time brings them up without a `gh issue list --label question`.
 
   ```markdown
   ## Next
@@ -204,7 +204,7 @@ Two things stay in documents either way:
   1. #41 — the config loader ignores `XDG_CONFIG_HOME`
   2. #38 — `sync --dry-run`
 
-  ## Door open
+  ## Open questions
 
   - #35 — should `sync` delete files missing at the source?
   ```
