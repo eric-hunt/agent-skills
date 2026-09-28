@@ -25,18 +25,19 @@ changed what should come first.
 ## Step 1 — Be current, and find the convention
 
 ```bash
-git switch <trunk> && git pull --ff-only
+git switch <trunk> && git pull --ff-only     # usually main
 gh repo view --json nameWithOwner 2>/dev/null   # a reachable tracker
 ls docs/ROADMAP.md docs/DEFECTS.md 2>/dev/null
 ```
 
-A checkout behind its remote reconciles the wrong file.
+A checkout behind its remote reconciles the wrong file. The first row that
+matches applies:
 
 | Found | Do |
 | --- | --- |
+| A tracker **and** `DEFECTS.md`, whatever else is there | Stop. Moving defects to the tracker is `set-foundation`'s migration; say so, with at most a few lines on what it will meet. Reconcile nothing |
 | A tracker and `ROADMAP.md` | The case this skill is for |
 | A tracker, no `ROADMAP.md` | Propose one only if more than one open item needs ordering, or the project orders by milestone instead — then read the milestone |
-| A tracker **and** `DEFECTS.md` | Stop. Moving defects to the tracker is `set-foundation`'s migration; say so |
 | No tracker | Reconcile `ROADMAP.md` against `DEFECTS.md` — entries fixed or removed — by the same steps |
 
 ## Step 2 — What changed since the roadmap was last touched
@@ -55,13 +56,22 @@ gh issue list --state all --limit 500 --search "updated:>$since" \
 # what the phase in between did
 git log --first-parent --since="$since" --format='%as %h %s'
 
-# the last review's proposals, which outlive the report
-git log --full-history --diff-filter=A --since="$since" --format='%h' -- 'docs/review-*.md'
+# the last review's proposals, which outlive the report. Not filtered by
+# date: a roadmap touched mid-phase puts the phase's review before the anchor
+git log --full-history --diff-filter=A -1 --format='%h' --name-only -- 'docs/review-*.md'
 git show <hash>:<path>          # read its `File these` and `Decide these`
 ```
 
+For each issue updated since, read what changed (`gh issue view <n>
+--comments`). A comment often records a decision the labels have not caught
+up with.
+
 A review's `File these` item that never became an issue is worth one line: it
-was proposed, and agreed or dropped, and the repository cannot say which.
+was proposed, and agreed or dropped, and the repository cannot say which. A
+review older than the phase that just ended was read last time; check it
+against the tracker rather than re-proposing it.
+
+The since-list says where to look first. It is not the boundary; Step 3 is.
 
 ## Step 3 — Reconcile, both directions
 
@@ -69,19 +79,24 @@ Against the **whole** tracker, not only what changed since the anchor — an
 item listed in `Next` and closed before it is just as stale.
 
 ```bash
-gh issue list --state all --limit 500 --json number,state,labels,milestone \
-  --jq '.[] | "\(.number) \(.state) \([.labels[].name] | join(",")) \(.milestone.title // "")"'
+gh issue list --state all --limit 500 --json number,title,state,labels,milestone \
+  --jq '.[] | "\(.number) \(.state) \([.labels[].name] | join(",")) \(.milestone.title // "-") \(.title)"'
 ```
 
 Match numbers by reading the lists, not by grep: `core#16` is another
 repository's issue, not this one's #16.
+
+Match sections by **role**, not heading: the list that holds the order is
+`Next`, the one that holds deferred questions is `Open questions`, whatever
+the file calls them. A list with neither role — items blocked elsewhere, say
+— is kept and reconciled the same way, by each issue's state.
 
 | Saw | Is |
 | --- | --- |
 | A listed issue, now closed | **Obvious** — drop it |
 | An open `question` issue not on `Open questions` | **Obvious** — add it |
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
-| An issue on `Open questions` no longer labelled `question` | Decided — it goes to `Next`, or it was closed |
+| An issue on `Open questions` not labelled `question` | Decided, or never a question — it goes to `Next`, or it was closed |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
 | A short title that no longer matches its issue | Only if the issue's **scope** changed. A paraphrase is the point of a short title |
@@ -121,7 +136,8 @@ order is theirs.
 
 ## Step 5 — Write it
 
-Only once the user has agreed the order. Keep the file's existing shape. With
+Only once the user has agreed the order. Keep the file's existing shape and
+headings; a list left empty keeps its heading and says so ("None open."). With
 no file, the shape is two lists of issue numbers with short titles, and
 nothing else:
 
