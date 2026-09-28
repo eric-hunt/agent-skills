@@ -62,9 +62,10 @@ git log --full-history --diff-filter=A -1 --format='%h' --name-only -- 'docs/rev
 git show <hash>:<path>          # read its `File these` and `Decide these`
 ```
 
-For each issue updated since, read what changed (`gh issue view <n>
---comments`). A comment often records a decision the labels have not caught
-up with.
+For each issue updated since, read what changed: `gh issue view <n>
+--comments` for the discussion, which often records a decision the labels
+have not caught up with. It prints comments only; plain `gh issue view <n>`
+has the body and the blockers Step 3 needs.
 
 A review's `File these` item that never became an issue is worth one line: it
 was proposed, and agreed or dropped, and the repository cannot say which. A
@@ -96,7 +97,7 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 | A listed issue, now closed | **Obvious** — drop it |
 | An open `question` issue not on `Open questions` | **Obvious** — add it |
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
-| An issue on `Open questions` not labelled `question` | Decided, or never a question — it goes to `Next`, or it was closed |
+| An issue on `Open questions` not labelled `question` | Decided, or never a question. Moving it off is **obvious** where the issue records the decision; its place in `Next` is a proposal |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
 | A short title that no longer matches its issue | Only if the issue's **scope** changed. A paraphrase is the point of a short title |
