@@ -1,9 +1,9 @@
 ---
 name: set-foundation
-description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
+description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down, and plan-next, which keeps the roadmap this sets up in step with the tracker.
 metadata:
   author: Eric Hunt
-  version: "1.4"
+  version: "1.5"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -194,23 +194,23 @@ Two things stay in documents either way:
 - **Ordering.** Issues are flat. A short `docs/ROADMAP.md` — or a milestone —
   holds the sequence: issue numbers with short titles under `Next`, in the
   order they get picked up, and optionally the open `question` issues under
-  `Door open`. Nothing else. Questions are the issues nobody is working on,
-  so they are the ones forgotten; listing them in the file read at planning
-  time brings them up without a `gh issue list --label question`.
+  `Open questions`. Nothing else. Questions are the issues nobody is working
+  on, so they are the ones forgotten; listing them in the file read at
+  planning time brings them up without a `gh issue list --label question`.
 
   ```markdown
   ## Next
 
-  1. #6 — S7 checks into validators that `abort()` with a class
-  2. #10 — `BlockSelector` accepts row letters past Z
+  1. #41 — the config loader ignores `XDG_CONFIG_HOME`
+  2. #38 — `sync --dry-run`
 
-  ## Door open
+  ## Open questions
 
-  - #14 — does a plate carry its own unit?
+  - #35 — should `sync` delete files missing at the source?
   ```
-- **A deliberate, bounded limitation is not a task.** "A parseable unit can
-  still be the wrong unit, and the ratio cancels it" belongs in the fact
-  document for its source or in the function's own documentation. As an issue
+- **A deliberate, bounded limitation is not a task.** "Timestamps compare to
+  the second, so two writes in the same second look unchanged" belongs in the
+  function's own documentation, or in the fact document for its source. As an issue
   it would stay open forever or be closed as won't-fix, and closing it hides
   it.
 
@@ -218,12 +218,12 @@ Two things stay in documents either way:
 it.** Across a bundle of repositories, "one place" means that one. An item
 blocked on another repository's change lives there; this repository keeps
 nothing, or at most a warning in the document a reader would otherwise trip
-over it in, pointing at the other issue (`pickr#16`).
+over it in, pointing at the other issue (`core#16`).
 
 **On a running project with a `DEFECTS.md`, a re-run of this skill is the
-path to the tracker.** The common case is a hybrid — a tracker already in use
-*and* a `DEFECTS.md`, with items in both — and there the real work is
-reconciling copies that have drifted apart. Put the migration to the user
+path to the tracker.** Expect a hybrid — a tracker already in use *and* a
+`DEFECTS.md`, with items in both — and there the real work is reconciling
+copies that have drifted apart. Put the migration to the user
 like any other list:
 
 - **Each `DEFECTS.md` entry becomes one proposed issue** with a title and
@@ -239,8 +239,9 @@ like any other list:
 
 Open issues only once the user has agreed the list, then delete `DEFECTS.md`,
 cut `ROADMAP.md` to its two lists, and update the pointer lines. If an
-unreleased `NEWS.md` entry describes the old convention, amend it in the same
-change — do not stack a bullet that contradicts it. Opening issues is visible
+unreleased changelog entry (`NEWS.md`, `CHANGELOG.md`) describes the old
+convention, amend it in the same change — do not stack one that contradicts
+it. Opening issues is visible
 outside the repository; never do it unasked.
 
 ### Give every document a first line
@@ -330,18 +331,18 @@ Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   in `ARCHITECTURE.md`, with the date.
 - **When you find a defect or plan future work** — open an issue labelled
   `bug`, `enhancement` or `question`, never a note in `ARCHITECTURE.md`.
-  Before planning what comes next, `gh issue list`.
+- **Before planning what comes next** — run `plan-next`. It brings
+  `docs/ROADMAP.md` up to date with the tracker and puts the order to the user.
 ```
 
-Without a tracker, the last line reads *"When recording a defect —
+Without a tracker, the defect line reads *"When recording a defect —
 `docs/DEFECTS.md`, never `ARCHITECTURE.md`"* instead.
 
 Name the moment, not the tool. Point, never restate — one line each. A
 pointer may state the *procedure* (open an issue, labelled `bug`); it must not
-restate a *rule*. Only
-for skills and documents the project has. The pointer names the skill; the
-skill never names the project. Put them to the user: they bind future
-sessions.
+restate a *rule*. Only for skills and documents the project has. The pointer
+names the skill; the skill never names the project. Put them to the user:
+they bind future sessions.
 
 ## Step 4 — Hand off
 
