@@ -403,9 +403,7 @@ Anything real that this phase will not fix — a defect found on the way, work
 the review shows is next — goes in **`File these`**, as a proposed issue with a
 title and label, or a proposed `DEFECTS.md`/`ROADMAP.md` entry on the fallback.
 The review files nothing itself: opening an issue is visible outside the
-repository, so it waits for the user's word like any fix. A proposed
-`question` issue also goes on the roadmap's `Door open` list, where the
-project keeps one.
+repository, so it waits for the user's word like any fix.
 
 Three decisions is a lot. If there are more, sort harder.
 
