@@ -72,7 +72,7 @@ gh issue list --state all --limit 500 --json number,state,labels,milestone \
   --jq '.[] | "\(.number) \(.state) \([.labels[].name] | join(",")) \(.milestone.title // "")"'
 ```
 
-Match numbers by reading the lists, not by grep: `pickr#16` is another
+Match numbers by reading the lists, not by grep: `core#16` is another
 repository's issue, not this one's #16.
 
 | Saw | Is |
@@ -94,16 +94,16 @@ Bring the obvious fixes as done-on-agreement, and the judgement as proposals:
 
 ```
 Next
-1. #6   S7 checks into validators            kept (was 1)
-2. #26  selector drops NA wells silently     new bug, from the #25 review
-3. #10  row letters past Z                   was 2
-dropped  #23 — closed by #27
+1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
+2. #52  sync exits 0 on a partial failure       new bug, from the last review
+3. #38  sync --dry-run                          was 2
+dropped  #44 — closed by #50
 
 Door open
-- #28   does a plate carry its own unit?     new
+- #53  should sync follow symlinks?             new
 
 Decide
-- #14 looks answered: #27 settled the unit boundary. Close it, or move it to Next?
+- #35 looks answered: #50 made deletion opt-in. Close it, or move it to Next?
 ```
 
 Ask the user to **correct**, not to author. For each placement, give the
@@ -131,11 +131,11 @@ _The order open issues get picked up in. `gh issue list` is the full set._
 
 ## Next
 
-1. #6 — S7 checks into validators that `abort()` with a class
+1. #41 — the config loader ignores `XDG_CONFIG_HOME`
 
 ## Door open
 
-- #28 — does a plate carry its own unit?
+- #53 — should `sync` follow symlinks?
 ```
 
 **Where it lands**, unless the project's agent file says otherwise:
