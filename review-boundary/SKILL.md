@@ -1,9 +1,9 @@
 ---
 name: review-boundary
-description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report, committed on the branch and removed before the merge, and changes nothing it reviews. Pairs with set-foundation, which lays down the tiered rules this review checks against.
+description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report, committed on the branch and removed before the merge, and changes nothing it reviews. Pairs with set-foundation, which lays down the tiered rules this review checks against, and plan-next, which acts on the roadmap findings at the start of the next phase.
 metadata:
   author: Eric Hunt
-  version: "1.4"
+  version: "1.5"
   summary: Read-only review at a phase boundary: what was decided without asking, and where the design strained
 license: MIT
 ---
@@ -285,19 +285,10 @@ wc -l <intent docs>
   project on the fallback whose repository has a reachable tracker is worth
   one line, not a finding.
 - **`ROADMAP.md` against the tracker, both directions.** A hand-kept list of
-  issues is a copy of tracker state. Report an issue it lists that is now
+  issues is a copy of tracker state: report an issue it lists that is now
   closed, and an open `question` issue — or an `enhancement` given a
-  milestone — that it does not list. A stale `Next` is noticed when someone
-  picks up a closed item; a stale `Door open` never is, so this check is what
-  makes keeping the copy safe.
-
-  ```bash
-  gh issue list --state all --limit 500 --json number,state,labels,milestone \
-    --jq '.[] | "\(.number) \(.state) \([.labels[].name] | join(",")) \(.milestone.title // "")"'
-  ```
-
-  Match numbers by reading the lists, not by grep — `pickr#16` is another
-  repository's issue, not this one's #16.
+  milestone — that it does not list. One line, naming the fix: run
+  `plan-next`, which carries the full check and the reordering.
 
 Do not argue the `foundational` share. On a mature project it is high because
 what was not load-bearing has been deleted.
