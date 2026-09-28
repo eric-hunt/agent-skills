@@ -138,11 +138,16 @@ _The order open issues get picked up in. `gh issue list` is the full set._
 - #28 — does a plate carry its own unit?
 ```
 
-Commit the change where the project's agent file says trunk changes go. If
-it says nothing, a `chore/` branch — pushed, and a PR opened, only on the
-user's word. Tracker changes proposed in `Decide` — closing, relabelling,
-filing — wait for the user's word the same way: they are visible outside the
-repository.
+**Where it lands**, unless the project's agent file says otherwise:
+
+- **`ROADMAP.md` alone** — a `chore` commit on the trunk. Reordering a list
+  does not need a PR.
+- **Anything more** — a defect cleaned up, another document brought into
+  line — a `chore/` branch, since that is a change someone should review.
+
+Push, or open the PR, on the user's word. Tracker changes proposed in
+`Decide` — closing, relabelling, filing — wait for it the same way: they are
+visible outside the repository.
 
 ## What this is not
 
