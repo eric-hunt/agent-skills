@@ -3,7 +3,7 @@ name: review-boundary
 description: Read-only review of a completed phase of work before it merges — inventory the decisions made without asking, find where the design acquired tension, and hand back a short report to discuss. Scales from a routine drift check to putting the architecture document itself on the table. Use at the end of a phase or refactor, before opening a PR, when asked to be critical of a design, or when asked to review what a stretch of work decided rather than what it changed. Produces a report, committed on the branch and removed before the merge, and changes nothing it reviews. Pairs with set-foundation, which lays down the tiered rules this review checks against.
 metadata:
   author: Eric Hunt
-  version: "1.3"
+  version: "1.4"
   summary: Read-only review at a phase boundary: what was decided without asking, and where the design strained
 license: MIT
 ---
@@ -284,6 +284,20 @@ wc -l <intent docs>
   and name the fix: re-run `set-foundation`, which carries the migration. A
   project on the fallback whose repository has a reachable tracker is worth
   one line, not a finding.
+- **`ROADMAP.md` against the tracker, both directions.** A hand-kept list of
+  issues is a copy of tracker state. Report an issue it lists that is now
+  closed, and an open `question` issue — or an `enhancement` given a
+  milestone — that it does not list. A stale `Next` is noticed when someone
+  picks up a closed item; a stale `Door open` never is, so this check is what
+  makes keeping the copy safe.
+
+  ```bash
+  gh issue list --state all --limit 500 --json number,state,labels,milestone \
+    --jq '.[] | "\(.number) \(.state) \([.labels[].name] | join(",")) \(.milestone.title // "")"'
+  ```
+
+  Match numbers by reading the lists, not by grep — `pickr#16` is another
+  repository's issue, not this one's #16.
 
 Do not argue the `foundational` share. On a mature project it is high because
 what was not load-bearing has been deleted.
@@ -398,7 +412,9 @@ Anything real that this phase will not fix — a defect found on the way, work
 the review shows is next — goes in **`File these`**, as a proposed issue with a
 title and label, or a proposed `DEFECTS.md`/`ROADMAP.md` entry on the fallback.
 The review files nothing itself: opening an issue is visible outside the
-repository, so it waits for the user's word like any fix.
+repository, so it waits for the user's word like any fix. A proposed
+`question` issue also goes on the roadmap's `Door open` list, where the
+project keeps one.
 
 Three decisions is a lot. If there are more, sort harder.
 

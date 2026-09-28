@@ -3,7 +3,7 @@ name: set-foundation
 description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
 metadata:
   author: Eric Hunt
-  version: "1.3"
+  version: "1.4"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -191,23 +191,57 @@ it.
 
 Two things stay in documents either way:
 
-- **Ordering.** Issues are flat. A short `docs/ROADMAP.md` of issue numbers in
-  the order they should be picked up — or a milestone — holds the sequence, and
-  nothing else.
+- **Ordering.** Issues are flat. A short `docs/ROADMAP.md` — or a milestone —
+  holds the sequence: issue numbers with short titles under `Next`, in the
+  order they get picked up, and optionally the open `question` issues under
+  `Door open`. Nothing else. Questions are the issues nobody is working on,
+  so they are the ones forgotten; listing them in the file read at planning
+  time brings them up without a `gh issue list --label question`.
+
+  ```markdown
+  ## Next
+
+  1. #6 — S7 checks into validators that `abort()` with a class
+  2. #10 — `BlockSelector` accepts row letters past Z
+
+  ## Door open
+
+  - #14 — does a plate carry its own unit?
+  ```
 - **A deliberate, bounded limitation is not a task.** "A parseable unit can
   still be the wrong unit, and the ratio cancels it" belongs in the fact
   document for its source or in the function's own documentation. As an issue
   it would stay open forever or be closed as won't-fix, and closing it hides
   it.
 
-**On a running project that uses the fallback, a re-run of this skill is the
-path to the tracker.** Put the migration to the user like any other list: each
-`DEFECTS.md` entry becomes one proposed issue with a title and label — entries
-that share a fix become one issue, fixed entries are dropped, deliberate
-limitations move to their document instead. Roadmap items without an issue
-get one. Open them only once the user has agreed the list, then delete
-`DEFECTS.md`, cut `ROADMAP.md` to ordering, and update the pointer lines.
-Opening issues is visible outside the repository; never do it unasked.
+**An item lives in the tracker of the repository whose code changes to fix
+it.** Across a bundle of repositories, "one place" means that one. An item
+blocked on another repository's change lives there; this repository keeps
+nothing, or at most a warning in the document a reader would otherwise trip
+over it in, pointing at the other issue (`pickr#16`).
+
+**On a running project with a `DEFECTS.md`, a re-run of this skill is the
+path to the tracker.** The common case is a hybrid — a tracker already in use
+*and* a `DEFECTS.md`, with items in both — and there the real work is
+reconciling copies that have drifted apart. Put the migration to the user
+like any other list:
+
+- **Each `DEFECTS.md` entry becomes one proposed issue** with a title and
+  label. Fixed entries are dropped; deliberate limitations move to their
+  document instead; roadmap items without an issue get one; items another
+  repository would fix go to its tracker.
+- **Entries that share a fix become one issue.** Where that issue already
+  exists with a deliberately narrow scope, add the entry to it as a comment
+  if the fix is the same — never widen its stated scope without asking.
+- **Where an item is in both, the issue's version wins**, unless it was
+  changed after the document's without the user agreeing to it. List every
+  disagreement for the user either way; never settle one silently.
+
+Open issues only once the user has agreed the list, then delete `DEFECTS.md`,
+cut `ROADMAP.md` to its two lists, and update the pointer lines. If an
+unreleased `NEWS.md` entry describes the old convention, amend it in the same
+change — do not stack a bullet that contradicts it. Opening issues is visible
+outside the repository; never do it unasked.
 
 ### Give every document a first line
 
@@ -302,7 +336,9 @@ Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 Without a tracker, the last line reads *"When recording a defect —
 `docs/DEFECTS.md`, never `ARCHITECTURE.md`"* instead.
 
-Name the moment, not the tool. Point, never restate — one line each. Only
+Name the moment, not the tool. Point, never restate — one line each. A
+pointer may state the *procedure* (open an issue, labelled `bug`); it must not
+restate a *rule*. Only
 for skills and documents the project has. The pointer names the skill; the
 skill never names the project. Put them to the user: they bind future
 sessions.
