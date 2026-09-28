@@ -3,7 +3,7 @@ name: set-foundation
 description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
 metadata:
   author: Eric Hunt
-  version: "1.2"
+  version: "1.3"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -160,7 +160,7 @@ rule. Two copies of a rule will disagree.
 
 | Signal | Split out to | Because |
 | --- | --- | --- |
-| A section most PRs touch while the rest sits still | `docs/DEFECTS.md`, `docs/ROADMAP.md` | Churn: if defects live in the rules document, `git log` on it stops saying when the architecture changed |
+| Defects and future work — a section most PRs touch while the rest sits still | the issue tracker; see *Where defects and future work live* | Churn: if defects live in the rules document, `git log` on it stops saying when the architecture changed |
 | A procedure followed during one activity | `docs/TESTING.md`, `docs/RELEASING.md` | Procedures are followed start to finish; rules are checked one at a time |
 | Facts about something the project does not control — an external API, a vendor spec, unit conversion | one document per source, named for it (`docs/UNITS.md`) | A fact is verified against its source, never tiered |
 | How the pieces fit — the classes or modules, and why that shape | `docs/COMPOSITION.md` | Read when learning or picking the project back up, not when checking a rule |
@@ -169,6 +169,45 @@ rule. Two copies of a rule will disagree.
 
 Do not create a document to hold the history of the rules. Git is that
 document.
+
+### Where defects and future work live
+
+**The default is the project's issue tracker**, when it has one:
+
+```bash
+gh repo view --json nameWithOwner 2>/dev/null   # a remote the tracker can reach
+```
+
+An issue has one place and a state: it closes with the PR that fixes it
+(`Closes #n`), so a fixed defect does not linger until someone prunes a file,
+and one item is never a defect entry, a roadmap line and an issue at once.
+Label with the tracker's defaults — `bug` for what is wrong, `enhancement` for
+what is next, `question` for a decision deferred until someone can make it.
+
+**Without a reachable tracker, fall back** to `docs/DEFECTS.md` (what is wrong
+now) and `docs/ROADMAP.md` (what to do next, pointing at defects rather than
+restating them). Pick one convention per project; the pointer lines below name
+it.
+
+Two things stay in documents either way:
+
+- **Ordering.** Issues are flat. A short `docs/ROADMAP.md` of issue numbers in
+  the order they should be picked up — or a milestone — holds the sequence, and
+  nothing else.
+- **A deliberate, bounded limitation is not a task.** "A parseable unit can
+  still be the wrong unit, and the ratio cancels it" belongs in the fact
+  document for its source or in the function's own documentation. As an issue
+  it would stay open forever or be closed as won't-fix, and closing it hides
+  it.
+
+**On a running project that uses the fallback, a re-run of this skill is the
+path to the tracker.** Put the migration to the user like any other list: each
+`DEFECTS.md` entry becomes one proposed issue with a title and label — entries
+that share a fix become one issue, fixed entries are dropped, deliberate
+limitations move to their document instead. Roadmap items without an issue
+get one. Open them only once the user has agreed the list, then delete
+`DEFECTS.md`, cut `ROADMAP.md` to ordering, and update the pointer lines.
+Opening issues is visible outside the repository; never do it unasked.
 
 ### Give every document a first line
 
@@ -255,8 +294,13 @@ Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   `git log --full-history --diff-filter=A -- 'docs/review-*.md'`.
 - **When a rule's tier stops matching how the project treats it** — re-tier it
   in `ARCHITECTURE.md`, with the date.
-- **When recording a defect** — `docs/DEFECTS.md`, never `ARCHITECTURE.md`.
+- **When you find a defect or plan future work** — open an issue labelled
+  `bug`, `enhancement` or `question`, never a note in `ARCHITECTURE.md`.
+  Before planning what comes next, `gh issue list`.
 ```
+
+Without a tracker, the last line reads *"When recording a defect —
+`docs/DEFECTS.md`, never `ARCHITECTURE.md`"* instead.
 
 Name the moment, not the tool. Point, never restate — one line each. Only
 for skills and documents the project has. The pointer names the skill; the
