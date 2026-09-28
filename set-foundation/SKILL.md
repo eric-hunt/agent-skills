@@ -3,7 +3,7 @@ name: set-foundation
 description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down.
 metadata:
   author: Eric Hunt
-  version: "1.1"
+  version: "1.2"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -163,6 +163,7 @@ rule. Two copies of a rule will disagree.
 | A section most PRs touch while the rest sits still | `docs/DEFECTS.md`, `docs/ROADMAP.md` | Churn: if defects live in the rules document, `git log` on it stops saying when the architecture changed |
 | A procedure followed during one activity | `docs/TESTING.md`, `docs/RELEASING.md` | Procedures are followed start to finish; rules are checked one at a time |
 | Facts about something the project does not control — an external API, a vendor spec, unit conversion | one document per source, named for it (`docs/UNITS.md`) | A fact is verified against its source, never tiered |
+| How the pieces fit — the classes or modules, and why that shape | `docs/COMPOSITION.md` | Read when learning or picking the project back up, not when checking a rule |
 | Tooling or environment | `docs/DEV-SETUP.md` | Read once at setup |
 | A document past roughly 300 lines | whichever fits | Past that, people grep rather than read |
 
@@ -248,7 +249,10 @@ happen:
 Rules and their tiers: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 - **At a phase boundary, before opening a PR** — run `review-boundary`. It
-  reports; it changes nothing.
+  reports; it changes nothing it reviews.
+- **Commit the review report, then delete it before the merge.** Merge with
+  `--merge`, never squash, or the report is gone. Find old ones with
+  `git log --full-history --diff-filter=A -- 'docs/review-*.md'`.
 - **When a rule's tier stops matching how the project treats it** — re-tier it
   in `ARCHITECTURE.md`, with the date.
 - **When recording a defect** — `docs/DEFECTS.md`, never `ARCHITECTURE.md`.
