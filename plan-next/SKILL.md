@@ -125,6 +125,13 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 `gh issue view <n>` shows `blocked-by:` and `blocking:`. An item does not go
 first while an open issue blocks it.
 
+A placement that rests on one issue landing before another — "#24 first, it
+changes the signature #19 edits" — is a dependency the tracker should hold,
+not only this proposal. Where it does not, propose the link under `Decide`.
+Once the user agrees, `scripts/block.sh <blocked> <blocker>` records it
+(`owner/repo#N` for another repository's blocker; `--remove` to undo), so the
+next phase starts from it instead of re-deriving it.
+
 ## Step 4 — Put the order to the user
 
 Bring the obvious fixes as done-on-agreement, and the judgement as proposals.
@@ -207,7 +214,8 @@ _The order open issues get picked up in. `gh issue list` is the full set._
   line — a `chore/` branch, since that is a change someone should review.
 
 Push, or open the PR, on the user's word. Tracker changes proposed in
-`Decide` — closing, relabelling, filing — wait for it the same way: they are
+`Decide` — closing, relabelling, filing, linking a blocker — wait for it the
+same way: they are
 visible outside the repository.
 
 ## What this is not
