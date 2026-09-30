@@ -127,21 +127,42 @@ first while an open issue blocks it.
 
 ## Step 4 — Put the order to the user
 
-Bring the obvious fixes as done-on-agreement, and the judgement as proposals:
+Bring the obvious fixes as done-on-agreement, and the judgement as proposals.
+
+**Every issue in the digest's `updated` section (the since-list, without the
+script) gets exactly one line**, with a reason: a position in `Next`, a place
+on `Open questions`, dropped, left off, or a question under `Decide`. Left off is a real answer — `Next` is not a
+backlog — but it is stated, not implied by silence. An issue that needs no
+line of its own (a comment that changed nothing) goes under `unchanged` with
+its number, so the count still adds up.
 
 ```
 Next
 1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
-2. #52  sync exits 0 on a partial failure       new bug, from the last review
+2. #52  sync exits 0 on a partial failure       new bug, from the last review; before #38, which retries on it
 3. #38  sync --dry-run                          was 2
-dropped  #44 — closed by #50
+dropped   #44 — closed by #50
+left off  #55 — cosmetic; nothing waits on it
 
 Open questions
 - #53  should sync follow symlinks?             new
 
 Decide
 - #35 looks answered: #50 made deletion opt-in. Close it, or move it to Next?
+
+unchanged  #47 (a comment, no decision)
 ```
+
+**Before asking, check the proposal against the digest**, not against memory
+of it:
+
+- every number in `updated` appears once, in a list or under `unchanged`;
+- every placement and every `Decide` item cites what it rests on, and a
+  comment that decided something is cited by its date;
+- no item in `Next` comes before an open issue that blocks it.
+
+A miss here is the failure this step exists to prevent: an issue the user
+never hears about stays wherever it was.
 
 Ask the user to **correct**, not to author. For each placement, give the
 reason in a few words — what it depends on, what it unblocks, what the last
