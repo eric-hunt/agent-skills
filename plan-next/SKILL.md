@@ -25,21 +25,21 @@ changed what should come first.
 ## Gathering in one pass
 
 `scripts/gather.sh`, beside this file, runs the reads in Steps 1–3 and prints
-one digest: checkout, convention, `since`, issues updated since — each with
-the comments posted since, and the body if it was opened since — merges, the
+one digest: checkout, convention, `since`, issues updated since, merges, the
 last review's `File these` and `Decide these`, every issue `ROADMAP.md` lists
-with its current state and open blockers, and the open issues it does not.
-Run it from the project, after Step 1's pull:
+with its current state and open blockers, the open issues it does not, and a
+`detail` section with the text behind them — every comment on those issues,
+and the body of each one not yet placed. Run it from the project, after
+Step 1's pull:
 
 ```bash
 <skill-dir>/scripts/gather.sh
 ```
 
 It reads only, and decides nothing: the steps below say what each section
-means. Read the whole digest, comments included; they are there because the
-decision is often in them. The commands below are the fallback where the
-script cannot run, and the way to look closer at an issue the digest shows
-only as a line — one not updated since.
+means. Read the whole digest, `detail` included; the comments are there
+because the decision is often in them. The commands below are the fallback
+where the script cannot run, and the way to look closer at an issue.
 
 ## Step 1 — Be current, and find the convention
 
@@ -84,8 +84,8 @@ git show <hash>:<path>          # read its `File these` and `Decide these`
 For each issue updated since, read what changed — every one, not a sample:
 `gh issue view <n> --comments` for the discussion, which often records a
 decision the labels have not caught up with. It prints comments only; plain
-`gh issue view <n>` has the body and the blockers Step 3 needs. The digest
-already holds both for these issues.
+`gh issue view <n>` has the body and the blockers Step 3 needs. The digest's
+`detail` already holds both.
 
 A review's `File these` item that never became an issue is worth one line: it
 was proposed, and agreed or dropped, and the repository cannot say which. A
@@ -129,12 +129,13 @@ first while an open issue blocks it.
 
 Bring the obvious fixes as done-on-agreement, and the judgement as proposals.
 
-**Every issue in the digest's `updated` section (the since-list, without the
-script) gets exactly one line**, with a reason: a position in `Next`, a place
-on `Open questions`, dropped, left off, or a question under `Decide`. Left off is a real answer — `Next` is not a
-backlog — but it is stated, not implied by silence. An issue that needs no
-line of its own (a comment that changed nothing) goes under `unchanged` with
-its number, so the count still adds up.
+**Every issue in the digest's `updated` and `open` sections gets a line**
+(without the script: the since-list, and each open issue not on the roadmap),
+with a reason: a position in `Next`, a place on `Open questions`, dropped,
+left off, or a question under `Decide`. Left off is a real answer — `Next` is
+not a backlog — but it is stated, not implied by silence; several left off for
+one reason can share a line. An updated issue that changed nothing goes under
+`unchanged`, so the count still adds up.
 
 ```
 Next
@@ -156,7 +157,8 @@ unchanged  #47 (a comment, no decision)
 **Before asking, check the proposal against the digest**, not against memory
 of it:
 
-- every number in `updated` appears once, in a list or under `unchanged`;
+- every number in `updated` and `open` appears, in a list or under
+  `unchanged`;
 - every placement and every `Decide` item cites what it rests on, and a
   comment that decided something is cited by its date;
 - no item in `Next` comes before an open issue that blocks it.
