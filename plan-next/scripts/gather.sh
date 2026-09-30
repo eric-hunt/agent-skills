@@ -3,13 +3,16 @@
 # Run from anywhere inside the repository. Reads only: it fetches, but
 # switches, pulls and writes nothing.
 #
-#   plan-next/scripts/gather.sh [--limit N]
+#   plan-next/scripts/gather.sh [--limit N] [--since ISO-DATE]
+#
+# --since replaces the anchor, to re-read a phase or test on a quiet repo.
 #
 # Sections, each headed `== name`:
 #   checkout        branch, and whether it is behind its upstream
 #   convention      tracker, ROADMAP.md, DEFECTS.md
 #   since           ROADMAP.md's last commit, the Step 2 anchor
-#   updated         issues updated since the anchor
+#   updated         issues updated since the anchor, each with the comments
+#                   posted since, and the body of any issue opened since
 #   merges          first-parent commits since the anchor
 #   review          the last review report's `File these` and `Decide these`
 #   roadmap         every issue ROADMAP.md lists, with its current state
@@ -20,7 +23,14 @@
 set -uo pipefail
 
 limit=500
-[[ ${1:-} == --limit ]] && limit=${2:?--limit needs a number}
+since_arg=""
+while (($#)); do
+  case $1 in
+    --limit) limit=${2:?--limit needs a number}; shift 2 ;;
+    --since) since_arg=${2:?--since needs a date}; shift 2 ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
@@ -58,14 +68,40 @@ fi
 
 # -- since ------------------------------------------------------------------
 section since
-since=$(git log -1 --format=%cI -- "$roadmap" 2>/dev/null)
-echo "${since:-none}"
+if [[ -n $since_arg ]]; then
+  since=$(date -u -j -f %Y-%m-%d "$since_arg" +%Y-%m-%dT00:00:00Z 2>/dev/null ||
+    date -u -d "$since_arg" +%Y-%m-%dT%H:%M:%SZ) || exit 2
+  echo "$since (given)"
+else
+  since=$(git log -1 --format=%cI -- "$roadmap" 2>/dev/null)
+  echo "${since:-none}"
+fi
+# the same instant in UTC, to compare against GitHub's createdAt as text
+if [[ $since == *Z ]]; then
+  since_utc=${since:0:19}
+else
+  since_utc=$(TZ=UTC0 git log -1 --date=format-local:%Y-%m-%dT%H:%M:%S \
+    --format=%cd -- "$roadmap" 2>/dev/null)
+fi
 
 # -- updated ----------------------------------------------------------------
+# Delivered, not fetched on demand: a discussion often records a decision the
+# labels have not caught up with, and reading it is not left to judgement.
+# Comments before the anchor were read last time; an issue opened since has
+# never been read, so its body comes too.
+# shellcheck disable=SC2016  # $s is a jq variable
+indent='gsub("\r"; "") | gsub("\n"; "\n    ")'
+# shellcheck disable=SC2016
+new_text='
+  (if .createdAt[0:19] > $s
+   then "  body:\n    \(.body | '"$indent"')" else empty end),
+  (.comments[] | select(.createdAt[0:19] > $s)
+   | "  comment \(.author.login) \(.createdAt[0:10]):\n    \(.body | '"$indent"')")'
 if [[ -n $repo && -n $since ]]; then
   section updated
   gh issue list --state all --limit "$limit" --search "updated:>$since" \
-    --json "$fields" --jq ".[] | $issue_line"
+    --json "$fields,createdAt,body,comments" \
+    --jq ".[] | \"$since_utc\" as \$s | $issue_line, $new_text"
 fi
 
 # -- merges -----------------------------------------------------------------
