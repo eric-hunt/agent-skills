@@ -22,6 +22,22 @@ closed items off, new questions on — takes a minute. The half worth running
 for is the judgement: where the new work goes, and whether the last phase
 changed what should come first.
 
+## Gathering in one pass
+
+`scripts/gather.sh`, beside this file, runs the reads in Steps 1–3 and prints
+one digest: checkout, convention, `since`, issues updated since, merges, the
+last review's `File these` and `Decide these`, every issue `ROADMAP.md` lists
+with its current state, and the open issues it does not. Run it from the
+project, after Step 1's pull:
+
+```bash
+<skill-dir>/scripts/gather.sh
+```
+
+It reads only, and decides nothing: the steps below say what each section
+means. The commands in them are the fallback where the script cannot run, and
+the way to look closer at one issue — the digest has no comments or bodies.
+
 ## Step 1 — Be current, and find the convention
 
 ```bash
