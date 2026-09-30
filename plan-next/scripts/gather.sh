@@ -37,8 +37,11 @@ cd "$(git rev-parse --show-toplevel)" || exit 1
 roadmap=docs/ROADMAP.md
 defects=docs/DEFECTS.md
 
-# one line per issue; open blockers only, since a closed one blocks nothing
-issue_line='"\(.number) \(.state) \([.labels[].name] | join(",") | if . == "" then "-" else . end) \(.milestone.title // "-")\([.blockedBy.nodes[]? | select(.state == "OPEN") | "\(.repository.nameWithOwner // "")#\(.number)"] | if length > 0 then " blocked-by:" + join(",") else "" end) \(.title)"'
+# one line per issue; open blockers only, since a closed one blocks nothing.
+# A blocker carries no repository field, so read it from its URL, and name
+# the repository only when it is another one. Needs `"<repo>" as $repo`.
+# shellcheck disable=SC2016
+issue_line='"\(.number) \(.state) \([.labels[].name] | join(",") | if . == "" then "-" else . end) \(.milestone.title // "-")\([.blockedBy.nodes[]? | select(.state == "OPEN") | (.url | capture("github.com/(?<r>[^/]+/[^/]+)/issues/").r) as $r | "\(if $r == $repo then "" else $r end)#\(.number)"] | if length > 0 then " blocked-by:" + join(",") else "" end) \(.title)"'
 fields=number,title,state,labels,milestone,blockedBy
 
 section() { printf '\n== %s\n' "$1"; }
@@ -101,7 +104,7 @@ if [[ -n $repo && -n $since ]]; then
   section updated
   gh issue list --state all --limit "$limit" --search "updated:>$since" \
     --json "$fields,createdAt,body,comments" \
-    --jq ".[] | \"$since_utc\" as \$s | $issue_line, $new_text"
+    --jq ".[] | \"$since_utc\" as \$s | \"$repo\" as \$repo | $issue_line, $new_text"
 fi
 
 # -- merges -----------------------------------------------------------------
@@ -141,7 +144,7 @@ if [[ -f $roadmap ]]; then
 fi
 
 all=$(gh issue list --state all --limit "$limit" --json "$fields" \
-  --jq ".[] | $issue_line")
+  --jq ".[] | \"$repo\" as \$repo | $issue_line")
 
 section roadmap
 for n in $listed; do
