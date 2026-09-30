@@ -96,13 +96,12 @@ fi
 [[ -n $repo ]] || exit 0
 
 # -- roadmap / open ---------------------------------------------------------
-# Bare #N only: core#16 and owner/repo#16 are other repositories' issues.
+# Bare #N only: core#16 is another repository's issue, and a roadmap lists
+# only this one's (an item blocked elsewhere lives in that tracker).
 listed=""
 if [[ -f $roadmap ]]; then
   listed=$(grep -oE '(^|[^[:alnum:]_/#.-])#[0-9]+' "$roadmap" \
     | grep -oE '[0-9]+$' | sort -un | paste -sd' ' -)
-  foreign=$(grep -oE '[[:alnum:]_.-]+(/[[:alnum:]_.-]+)?#[0-9]+' "$roadmap" \
-    | sort -u)
 fi
 
 all=$(gh issue list --state all --limit "$limit" --json "$fields" \
@@ -113,16 +112,6 @@ for n in $listed; do
   line=$(grep -E "^$n " <<<"$all") || line="$n not found in the last $limit issues"
   echo "$line"
 done
-# another repository's issue: owner/repo#N is checkable; a short name is not
-while read -r ref; do
-  [[ -z $ref ]] && continue
-  if [[ $ref == */* ]]; then
-    gh issue view "${ref#*#}" -R "${ref%#*}" --json state,title \
-      --jq "\"$ref \(.state) \(.title)\"" 2>/dev/null || echo "$ref unreadable"
-  else
-    echo "$ref — short name; resolve the repository to check its state"
-  fi
-done <<<"${foreign:-}"
 
 section open
 grep -E '^[0-9]+ OPEN ' <<<"$all" | while read -r n rest; do
