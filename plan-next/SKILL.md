@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.0"
+  version: "1.1"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
