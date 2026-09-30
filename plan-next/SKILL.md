@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.0"
+  version: "1.1"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -21,6 +21,25 @@ until they pick up a closed item, and nobody ever notices a stale
 closed items off, new questions on — takes a minute. The half worth running
 for is the judgement: where the new work goes, and whether the last phase
 changed what should come first.
+
+## Gathering in one pass
+
+`scripts/gather.sh`, beside this file, runs the reads in Steps 1–3 and prints
+one digest: checkout, convention, `since`, issues updated since, merges, the
+last review's `File these` and `Decide these`, every issue `ROADMAP.md` lists
+with its current state and open blockers, the open issues it does not, and a
+`detail` section with the text behind them — every comment on those issues,
+and the body of each one not yet placed. Run it from the project, after
+Step 1's pull:
+
+```bash
+<skill-dir>/scripts/gather.sh
+```
+
+It reads only, and decides nothing: the steps below say what each section
+means. Read the whole digest, `detail` included; the comments are there
+because the decision is often in them. The commands below are the fallback
+where the script cannot run, and the way to look closer at an issue.
 
 ## Step 1 — Be current, and find the convention
 
@@ -62,10 +81,11 @@ git log --full-history --diff-filter=A -1 --format='%h' --name-only -- 'docs/rev
 git show <hash>:<path>          # read its `File these` and `Decide these`
 ```
 
-For each issue updated since, read what changed: `gh issue view <n>
---comments` for the discussion, which often records a decision the labels
-have not caught up with. It prints comments only; plain `gh issue view <n>`
-has the body and the blockers Step 3 needs.
+For each issue updated since, read what changed — every one, not a sample:
+`gh issue view <n> --comments` for the discussion, which often records a
+decision the labels have not caught up with. It prints comments only; plain
+`gh issue view <n>` has the body and the blockers Step 3 needs. The digest's
+`detail` already holds both.
 
 A review's `File these` item that never became an issue is worth one line: it
 was proposed, and agreed or dropped, and the repository cannot say which. A
@@ -105,23 +125,53 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 `gh issue view <n>` shows `blocked-by:` and `blocking:`. An item does not go
 first while an open issue blocks it.
 
+A placement that rests on one issue landing before another — "#24 first, it
+changes the signature #19 edits" — is a dependency the tracker should hold,
+not only this proposal. Where it does not, propose the link under `Decide`.
+Once the user agrees, `scripts/block.sh <blocked> <blocker>` records it
+(`owner/repo#N` for another repository's blocker; `--remove` to undo), so the
+next phase starts from it instead of re-deriving it.
+
 ## Step 4 — Put the order to the user
 
-Bring the obvious fixes as done-on-agreement, and the judgement as proposals:
+Bring the obvious fixes as done-on-agreement, and the judgement as proposals.
+
+**Every issue in the digest's `updated` and `open` sections gets a line**
+(without the script: the since-list, and each open issue not on the roadmap),
+with a reason: a position in `Next`, a place on `Open questions`, dropped,
+left off, or a question under `Decide`. Left off is a real answer — `Next` is
+not a backlog — but it is stated, not implied by silence; several left off for
+one reason can share a line. An updated issue that changed nothing goes under
+`unchanged`, so the count still adds up.
 
 ```
 Next
 1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
-2. #52  sync exits 0 on a partial failure       new bug, from the last review
+2. #52  sync exits 0 on a partial failure       new bug, from the last review; before #38, which retries on it
 3. #38  sync --dry-run                          was 2
-dropped  #44 — closed by #50
+dropped   #44 — closed by #50
+left off  #55 — cosmetic; nothing waits on it
 
 Open questions
 - #53  should sync follow symlinks?             new
 
 Decide
 - #35 looks answered: #50 made deletion opt-in. Close it, or move it to Next?
+
+unchanged  #47 (a comment, no decision)
 ```
+
+**Before asking, check the proposal against the digest**, not against memory
+of it:
+
+- every number in `updated` and `open` appears, in a list or under
+  `unchanged`;
+- every placement and every `Decide` item cites what it rests on, and a
+  comment that decided something is cited by its date;
+- no item in `Next` comes before an open issue that blocks it.
+
+A miss here is the failure this step exists to prevent: an issue the user
+never hears about stays wherever it was.
 
 Ask the user to **correct**, not to author. For each placement, give the
 reason in a few words — what it depends on, what it unblocks, what the last
@@ -164,7 +214,8 @@ _The order open issues get picked up in. `gh issue list` is the full set._
   line — a `chore/` branch, since that is a change someone should review.
 
 Push, or open the PR, on the user's word. Tracker changes proposed in
-`Decide` — closing, relabelling, filing — wait for it the same way: they are
+`Decide` — closing, relabelling, filing, linking a blocker — wait for it the
+same way: they are
 visible outside the repository.
 
 ## What this is not
