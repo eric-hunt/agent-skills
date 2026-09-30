@@ -25,18 +25,21 @@ changed what should come first.
 ## Gathering in one pass
 
 `scripts/gather.sh`, beside this file, runs the reads in Steps 1–3 and prints
-one digest: checkout, convention, `since`, issues updated since, merges, the
+one digest: checkout, convention, `since`, issues updated since — each with
+the comments posted since, and the body if it was opened since — merges, the
 last review's `File these` and `Decide these`, every issue `ROADMAP.md` lists
-with its current state, and the open issues it does not. Run it from the
-project, after Step 1's pull:
+with its current state and open blockers, and the open issues it does not.
+Run it from the project, after Step 1's pull:
 
 ```bash
 <skill-dir>/scripts/gather.sh
 ```
 
 It reads only, and decides nothing: the steps below say what each section
-means. The commands in them are the fallback where the script cannot run, and
-the way to look closer at one issue — the digest has no comments or bodies.
+means. Read the whole digest, comments included; they are there because the
+decision is often in them. The commands below are the fallback where the
+script cannot run, and the way to look closer at an issue the digest shows
+only as a line — one not updated since.
 
 ## Step 1 — Be current, and find the convention
 
@@ -78,10 +81,11 @@ git log --full-history --diff-filter=A -1 --format='%h' --name-only -- 'docs/rev
 git show <hash>:<path>          # read its `File these` and `Decide these`
 ```
 
-For each issue updated since, read what changed: `gh issue view <n>
---comments` for the discussion, which often records a decision the labels
-have not caught up with. It prints comments only; plain `gh issue view <n>`
-has the body and the blockers Step 3 needs.
+For each issue updated since, read what changed — every one, not a sample:
+`gh issue view <n> --comments` for the discussion, which often records a
+decision the labels have not caught up with. It prints comments only; plain
+`gh issue view <n>` has the body and the blockers Step 3 needs. The digest
+already holds both for these issues.
 
 A review's `File these` item that never became an issue is worth one line: it
 was proposed, and agreed or dropped, and the repository cannot say which. A
