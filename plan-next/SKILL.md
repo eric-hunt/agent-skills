@@ -119,7 +119,7 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
 | An issue on `Open questions` not labelled `question` | Decided, or never a question. Moving it off is **obvious** where the issue records the decision; its place in `Next` is a proposal. An issue still labelled `question` *and* `enhancement` stays on `Open questions`, not in `Next` |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
-| An open issue small enough to go in a `Next` item's PR — the same files, the same document, the same breaking release | A **rider**: propose it under that item, `with #N`, and give the reason. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
+| An open issue small enough that a `Next` item's PR would naturally take it along | A **rider**: propose it indented under that item, `with #N`, and give the reason: what the host already touches that the rider needs (a file it edits, a document it rewrites or condenses, a breaking release it ships in). The test is the shared PR, not a matching filename. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
 | A rider whose host has closed | Closed with it: **obvious**, drop it. Still open: missed the PR; a candidate again |
 | An open `bug` or `enhancement` that cannot start until a choice it lays out is made ("decide before implementing") | A question in practice. Under `Decide`: answer it now (with the issue's recommendation, if it gives one), or add `question` beside its label and put it on `Open questions`. Add, do not swap: `enhancement` keeps saying the work is wanted, and it returns as a candidate once the answer takes `question` off |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
@@ -132,8 +132,10 @@ A placement that rests on one issue landing before another — "#24 first, it
 changes the signature #19 edits" — is a dependency the tracker should hold,
 not only this proposal. Where it does not, propose the link under `Decide`.
 Once the user agrees, `scripts/block.sh <blocked> <blocker>` records it
-(`owner/repo#N` for another repository's blocker; `--remove` to undo), so the
-next phase starts from it instead of re-deriving it.
+(`owner/repo#N` for another repository's blocker; `--remove` to undo a link
+set in error), so the next phase starts from it instead of re-deriving it. A
+blocker that has closed blocks nothing — the digest shows open ones only —
+and its link is history: leave it.
 
 ## Step 4 — Put the order to the user
 
