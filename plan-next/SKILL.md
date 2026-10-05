@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.1"
+  version: "1.2"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -119,6 +119,9 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
 | An issue on `Open questions` not labelled `question` | Decided, or never a question. Moving it off is **obvious** where the issue records the decision; its place in `Next` is a proposal |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
+| An open issue small enough to go in a `Next` item's PR — the same files, the same document, the same breaking release | A **rider**: propose it under that item, `with #N`, and give the reason. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
+| A rider whose host has closed | Closed with it: **obvious**, drop it. Still open: missed the PR; a candidate again |
+| An open `bug` or `enhancement` that cannot start until a choice it lays out is made ("decide before implementing") | A question in practice. Under `Decide`: answer it now (with the issue's recommendation, if it gives one), or label it `question` and add it to `Open questions` |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
 | A short title that no longer matches its issue | Only if the issue's **scope** changed. A paraphrase is the point of a short title |
 
@@ -138,8 +141,8 @@ Bring the obvious fixes as done-on-agreement, and the judgement as proposals.
 
 **Every issue in the digest's `updated` and `open` sections gets a line**
 (without the script: the since-list, and each open issue not on the roadmap),
-with a reason: a position in `Next`, a place on `Open questions`, dropped,
-left off, or a question under `Decide`. Left off is a real answer — `Next` is
+with a reason: a position in `Next`, a rider on a `Next` item, a place on
+`Open questions`, dropped, left off, or a question under `Decide`. Left off is a real answer — `Next` is
 not a backlog — but it is stated, not implied by silence; several left off for
 one reason can share a line. An updated issue that changed nothing goes under
 `unchanged`, so the count still adds up.
@@ -149,6 +152,7 @@ Next
 1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
 2. #52  sync exits 0 on a partial failure       new bug, from the last review; before #38, which retries on it
 3. #38  sync --dry-run                          was 2
+   with #56  --dry-run missing from the README   new; same README section, same PR
 dropped   #44 — closed by #50
 left off  #55 — cosmetic; nothing waits on it
 
@@ -189,8 +193,8 @@ order is theirs.
 
 Only once the user has agreed the order. Keep the file's existing shape and
 headings; a list left empty keeps its heading and says so ("None open."). With
-no file, the shape is two lists of issue numbers with short titles, and
-nothing else:
+no file, the shape is two lists of issue numbers with short titles — riders
+indented under their host — and nothing else:
 
 ```markdown
 # Roadmap
@@ -200,6 +204,8 @@ _The order open issues get picked up in. `gh issue list` is the full set._
 ## Next
 
 1. #41 — the config loader ignores `XDG_CONFIG_HOME`
+2. #38 — `sync --dry-run`
+   - with #56 — `--dry-run` is missing from the README
 
 ## Open questions
 
