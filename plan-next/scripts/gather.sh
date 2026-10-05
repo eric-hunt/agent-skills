@@ -19,7 +19,7 @@
 #   open            every open issue not on ROADMAP.md
 #   detail          the text behind those lines (see below)
 #
-# Issue lines read: number state labels milestone [blocked-by:...] title
+# Issue lines read: number state labels milestone [blocked-by: #N, owner/repo#N -] title
 
 set -uo pipefail
 
@@ -102,13 +102,15 @@ q() {
     --argjson listed "[${listed// /,}]" "$(cat <<'JQ'
 # one line per issue; open blockers only, since a closed one blocks nothing.
 # A blocker carries no repository field, so read it from its URL, and name
-# the repository only when it is another one.
+# the repository only when it is another one. Blockers here come first,
+# each separated by ", ": "ombre#36,#8" was once read as ombre#8.
 def line:
   "\(.number) \(.state) \([.labels[].name] | join(",") | if . == "" then "-" else . end) \(.milestone.title // "-")"
   + ([.blockedBy.nodes[]? | select(.state == "OPEN")
       | (.url | capture("github.com/(?<r>[^/]+/[^/]+)/issues/").r) as $r
-      | "\(if $r == $repo then "" else $r end)#\(.number)"]
-     | if length > 0 then " blocked-by:" + join(",") else "" end)
+      | {other: ($r != $repo), ref: "\(if $r == $repo then "" else $r end)#\(.number)"}]
+     | sort_by(.other) | map(.ref)
+     | if length > 0 then " blocked-by: " + join(", ") + " -" else "" end)
   + " \(.title)";
 def after: .[0:19] > $since and $since != "";
 def on_roadmap: .number as $n | $listed | index($n) != null;
