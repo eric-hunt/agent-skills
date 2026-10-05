@@ -13,7 +13,8 @@
 #   since           ROADMAP.md's last commit, the Step 2 anchor
 #   updated         issues updated since the anchor
 #   merges          first-parent commits since the anchor
-#   review          the last review report's `File these` and `Decide these`
+#   review          the last review report's `File these` and `Decide these`,
+#                   and the commits made after it
 #   roadmap         every issue ROADMAP.md lists, with its current state
 #   open            every open issue not on ROADMAP.md
 #   detail          the text behind those lines (see below)
@@ -143,6 +144,12 @@ if [[ -n ${hash:-} ]]; then
     /^#+ / { keep = /^#+ (File these|Decide these)/ }
     keep
   '
+  # A proposal fixed on the branch after the report was written never reaches
+  # the tracker, and a first-parent log hides it inside the merge. Listing
+  # the commits makes "already done" checkable rather than remembered.
+  echo
+  echo "commits after the review:"
+  git log --no-merges -n 30 --format='%as %h %s' "$hash..HEAD"
 else
   echo "none"
 fi
@@ -167,8 +174,9 @@ q '.[] | select(.state == "OPEN" and (on_roadmap | not)) | line'
 # unplaced as one opened after it.
 #
 #   comments  every issue in roadmap (open), open, and updated
-#   body      open issues not on the roadmap, and issues opened since the
-#             anchor (a listed issue was read when it was placed)
+#   body      open issues other than questions — a candidate's to place it,
+#             a `Next` item's to judge what rides with it — and issues opened
+#             since the anchor
 #
 # An issue with neither is left out; its line above is all there is.
 #
@@ -176,7 +184,8 @@ q '.[] | select(.state == "OPEN" and (on_roadmap | not)) | line'
 section detail
 # shellcheck disable=SC2016  # jq variables, not shell ones
 select_detail='[.[] | select(.state == "OPEN" or (.updatedAt | after))
-    | .show_body = ((.state == "OPEN" and (on_roadmap | not)) or (.createdAt | after))
+    | .show_body = ((.state == "OPEN" and ([.labels[].name] | index("question") | not))
+                    or (.createdAt | after))
     | select(.show_body or (.comments | length > 0))]
   | sort_by(if on_roadmap then 0 elif .state == "OPEN" then 1 else 2 end, .number)'
 # shellcheck disable=SC2016
