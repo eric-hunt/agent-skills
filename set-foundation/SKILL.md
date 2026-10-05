@@ -3,7 +3,7 @@ name: set-foundation
 description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down, and plan-next, which keeps the roadmap this sets up in step with the tracker.
 metadata:
   author: Eric Hunt
-  version: "1.6"
+  version: "1.7"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -205,9 +205,9 @@ Two things stay in documents either way:
   ```markdown
   ## Next
 
-  1. #41 — the config loader ignores `XDG_CONFIG_HOME`
-  2. #38 — `sync --dry-run`
+  1. #38 — `sync --dry-run`
      - with #56 — `--dry-run` is missing from the README
+  2. #41 — the config loader ignores `XDG_CONFIG_HOME`
 
   ## Open questions
 
