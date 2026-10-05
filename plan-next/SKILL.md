@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.4"
+  version: "1.5"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -123,7 +123,7 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
 | An issue on `Open questions` not labelled `question` | Decided, or never a question. Moving it off is **obvious** where the issue records the decision; its place in `Next` is a proposal. An issue still labelled `question` *and* `enhancement` stays on `Open questions`, not in `Next` |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
-| An open issue small enough that a `Next` item's PR would naturally take it along | A **rider**: propose it indented directly under that item, `with #N`, and give the reason: what the host's body says it touches that the rider needs (a file it edits, a document it rewrites or condenses, a breaking release it ships in). The test is the shared PR, not a matching filename; the evidence is the host's body, in `detail`, not a guess at its scope. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
+| An open issue small enough that a `Next` item's PR would naturally take it along | A **rider**: propose it indented directly under that item, `with #N`, and give the reason: what the host's body says it touches that the rider needs (a file it edits, a document it rewrites or condenses, a breaking release it ships in). The test is the shared PR, not a matching filename; the evidence is the host's body, in `detail`, not a guess at its scope. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker. "Fix it first" inside one PR is still a rider: the order of commits in a PR is not a roadmap order |
 | A rider whose host has closed | Closed with it: **obvious**, drop it. Still open: missed the PR; a candidate again |
 | An open `bug` or `enhancement` that cannot start until a choice it lays out is made ("decide before implementing") | A question in practice. Under `Decide`: answer it now (with the issue's recommendation, if it gives one), or add `question` beside its label and put it on `Open questions`. Add, do not swap: `enhancement` keeps saying the work is wanted, and it returns as a candidate once the answer takes `question` off |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
@@ -131,6 +131,9 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 
 `gh issue view <n>` shows `blocked-by:` and `blocking:`. An item does not go
 first while an open issue blocks it.
+
+A rider needs no link: it shares its host's PR. A blocker orders *separate*
+PRs — one that could not be reviewed or merged until the other has.
 
 A placement that rests on one issue landing before another — "#24 first, it
 changes the signature #19 edits" — is a dependency the tracker should hold,
