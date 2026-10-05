@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.2"
+  version: "1.3"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -87,8 +87,12 @@ decision the labels have not caught up with. It prints comments only; plain
 `gh issue view <n>` has the body and the blockers Step 3 needs. The digest's
 `detail` already holds both.
 
-A review's `File these` item that never became an issue is worth one line: it
-was proposed, and agreed or dropped, and the repository cannot say which. A
+A review's `File these` item that never became an issue may have been fixed
+on the branch instead: check it against the commits made after the review
+(the digest lists them under it) before proposing to file it. One with no
+issue and no commit is worth one line: it was proposed, and agreed or
+dropped, and the repository cannot say which. A `Decide these` item is
+checked the same way. A
 review older than the phase that just ended was read last time; check it
 against the tracker rather than re-proposing it.
 
@@ -119,7 +123,7 @@ the file calls them. A list with neither role — items blocked elsewhere, say
 | An `enhancement` with a milestone, not in `Next` | Scheduled somewhere, missing here — place it |
 | An issue on `Open questions` not labelled `question` | Decided, or never a question. Moving it off is **obvious** where the issue records the decision; its place in `Next` is a proposal. An issue still labelled `question` *and* `enhancement` stays on `Open questions`, not in `Next` |
 | An open `bug` or `enhancement` not in `Next` | A candidate, not an error. `Next` is an order, not a backlog |
-| An open issue small enough that a `Next` item's PR would naturally take it along | A **rider**: propose it indented under that item, `with #N`, and give the reason: what the host already touches that the rider needs (a file it edits, a document it rewrites or condenses, a breaking release it ships in). The test is the shared PR, not a matching filename. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
+| An open issue small enough that a `Next` item's PR would naturally take it along | A **rider**: propose it indented directly under that item, `with #N`, and give the reason: what the host's body says it touches that the rider needs (a file it edits, a document it rewrites or condenses, a breaking release it ships in). The test is the shared PR, not a matching filename; the evidence is the host's body, in `detail`, not a guess at its scope. It lands with its host or comes back as a candidate. One that fits with nothing stays in the tracker |
 | A rider whose host has closed | Closed with it: **obvious**, drop it. Still open: missed the PR; a candidate again |
 | An open `bug` or `enhancement` that cannot start until a choice it lays out is made ("decide before implementing") | A question in practice. Under `Decide`: answer it now (with the issue's recommendation, if it gives one), or add `question` beside its label and put it on `Open questions`. Add, do not swap: `enhancement` keeps saying the work is wanted, and it returns as a candidate once the answer takes `question` off |
 | A listed item blocked on another repository | Check that issue's state (`gh issue view <n> -R <owner/repo>`). A closed blocker unblocks it |
@@ -152,9 +156,9 @@ one reason can share a line. An updated issue that changed nothing goes under
 ```
 Next
 1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
-2. #52  sync exits 0 on a partial failure       new bug, from the last review; before #38, which retries on it
-3. #38  sync --dry-run                          was 2
-   with #56  --dry-run missing from the README   new; same README section, same PR
+2. #38  sync --dry-run                          was 2
+   with #56  --dry-run missing from the README   new; #38's body adds the flag to the README's usage section
+3. #52  sync exits 0 on a partial failure       new bug, from the last review
 dropped   #44 — closed by #50
 left off  #55 — cosmetic; nothing waits on it
 
@@ -205,9 +209,9 @@ _The order open issues get picked up in. `gh issue list` is the full set._
 
 ## Next
 
-1. #41 — the config loader ignores `XDG_CONFIG_HOME`
-2. #38 — `sync --dry-run`
+1. #38 — `sync --dry-run`
    - with #56 — `--dry-run` is missing from the README
+2. #41 — the config loader ignores `XDG_CONFIG_HOME`
 
 ## Open questions
 
