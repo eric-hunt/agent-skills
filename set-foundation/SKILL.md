@@ -3,7 +3,7 @@ name: set-foundation
 description: Lay down a project's groundwork documents — the architecture notes, invariants, and contracts — and mark each rule as foundational, in question, or a loose contract. Works on a new project before there is code, and on a running one by recovering the architecture the code already implements and putting it to the user. Use when starting a project, when a project has no architecture document, when the existing documents are not trusted, or when asked what this project's actual rules are. Runs as a conversation; writes documents only once the user has agreed to them. Pairs with review-boundary, which checks each phase of work against the tiers this lays down, and plan-next, which keeps the roadmap this sets up in step with the tracker.
 metadata:
   author: Eric Hunt
-  version: "1.5"
+  version: "1.6"
   summary: Lays a project's groundwork documents and tiers each rule foundational, in question, or contract
 license: MIT
 ---
@@ -183,6 +183,8 @@ An issue has one place and a state: it closes with the PR that fixes it
 and one item is never a defect entry, a roadmap line and an issue at once.
 Label with the tracker's defaults — `bug` for what is wrong, `enhancement` for
 what is next, `question` for a decision deferred until someone can make it.
+Labels add: work that is wanted but waits on a decision is `enhancement`
+*and* `question`, and answering it removes only `question`.
 
 **Without a reachable tracker, fall back** to `docs/DEFECTS.md` (what is wrong
 now) and `docs/ROADMAP.md` (what to do next, pointing at defects rather than
@@ -193,8 +195,10 @@ Two things stay in documents either way:
 
 - **Ordering.** Issues are flat. A short `docs/ROADMAP.md` — or a milestone —
   holds the sequence: issue numbers with short titles under `Next`, in the
-  order they get picked up, and optionally the open `question` issues under
-  `Open questions`. Nothing else. Questions are the issues nobody is working
+  order they get picked up — each with any small issue that rides along in
+  its PR indented beneath it — and optionally the open `question` issues
+  under `Open questions`. Nothing else: an issue that fits nowhere yet stays
+  in the tracker. Questions are the issues nobody is working
   on, so they are the ones forgotten; listing them in the file read at
   planning time brings them up without a `gh issue list --label question`.
 
@@ -203,6 +207,7 @@ Two things stay in documents either way:
 
   1. #41 — the config loader ignores `XDG_CONFIG_HOME`
   2. #38 — `sync --dry-run`
+     - with #56 — `--dry-run` is missing from the README
 
   ## Open questions
 
