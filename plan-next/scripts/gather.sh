@@ -15,7 +15,8 @@
 #   merges          first-parent commits since the anchor
 #   review          the last review report's `File these` and `Decide these`,
 #                   and the commits made after it
-#   roadmap         every issue ROADMAP.md lists, with its current state
+#   roadmap         every issue ROADMAP.md lists, with its current state, and
+#                   the state of any other repository's issue it names
 #   open            every open issue not on ROADMAP.md
 #   detail          the text behind those lines (see below)
 #
@@ -82,12 +83,15 @@ else
 fi
 
 # -- the tracker, read once -------------------------------------------------
-# Bare #N only: core#16 is another repository's issue, and a roadmap lists
-# only this one's (an item blocked elsewhere lives in that tracker).
+# Bare #N is this repository's issue. core#16 or owner/core#16 is another
+# repository's: the roadmap names one only as context ("ombre#29, then #22"),
+# but its state still decides whether that context is stale.
 listed=""
+foreign=""
 if [[ -f $roadmap ]]; then
   listed=$(grep -oE '(^|[^[:alnum:]_/#.-])#[0-9]+' "$roadmap" \
     | grep -oE '[0-9]+$' | sort -un | paste -sd' ' -)
+  foreign=$(grep -oE '[[:alnum:]_.-]+(/[[:alnum:]_.-]+)?#[0-9]+' "$roadmap" | sort -u)
 fi
 
 issues="[]"
@@ -164,6 +168,17 @@ for n in $listed; do
   q ".[] | select(.number == $n) | line" | grep . ||
     echo "$n not found in the last $limit issues"
 done
+
+# another repository's issue, named in the roadmap; a short name takes this
+# repository's owner
+while read -r ref; do
+  [[ -z $ref || -z $repo ]] && continue
+  other=${ref%#*}
+  [[ $other == */* ]] || other="${repo%/*}/$other"
+  [[ $other == "$repo" ]] && continue
+  gh issue view "${ref##*#}" -R "$other" --json state,title \
+    --jq "\"$ref \(.state) \(.title)\"" 2>/dev/null || echo "$ref unreadable"
+done <<<"$foreign"
 
 section open
 q '.[] | select(.state == "OPEN" and (on_roadmap | not)) | line'
