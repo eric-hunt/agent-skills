@@ -183,6 +183,8 @@ An issue has one place and a state: it closes with the PR that fixes it
 and one item is never a defect entry, a roadmap line and an issue at once.
 Label with the tracker's defaults — `bug` for what is wrong, `enhancement` for
 what is next, `question` for a decision deferred until someone can make it.
+Labels add: work that is wanted but waits on a decision is `enhancement`
+*and* `question`, and answering it removes only `question`.
 
 **Without a reachable tracker, fall back** to `docs/DEFECTS.md` (what is wrong
 now) and `docs/ROADMAP.md` (what to do next, pointing at defects rather than
