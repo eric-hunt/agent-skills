@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.3"
+  version: "1.4"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -187,6 +187,11 @@ Ask the user to **correct**, not to author. For each placement, give the
 reason in a few words — what it depends on, what it unblocks, what the last
 phase left warm. Do not impose a ranking rule (bugs first, oldest first); the
 order is theirs.
+
+A rider with evidence is a placement like any other: put it under its host
+and let the user strike it. `Decide` is for choices with no default — a
+question to answer, a tracker change — not for a proposal you have already
+made.
 
 - **Raise an open question only with evidence** that the last phase
   changed its answer. Re-asking every question every phase trains the user to
