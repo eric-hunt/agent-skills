@@ -160,13 +160,18 @@ The proposal is read rendered, so write it as markdown, not in a code fence,
 and do not lean on spacing: aligned columns collapse, and lines not in a list
 run together into one paragraph. Each list gets a heading, and what `Next`
 drops or leaves off goes under subheadings of its own; every line under a
-heading is a list item, and a rider is a nested item under its host. Link
-each issue number to its issue
+heading is a list item, and a rider is a nested item under its host.
+`Unchanged` comes first, out of the way, and `Decide` last, where the user
+acts on it. Link each issue number to its issue
 (`https://github.com/<tracker>/issues/<n>`, the digest's `tracker:` line;
 `owner/repo#N` links into that repository), bold its title, and put the
 reason after a dash in italics:
 
 ```markdown
+### Unchanged
+
+- [#47](https://github.com/owner/repo/issues/47) — _a comment, no decision_
+
 ### Next
 
 1. [#41](https://github.com/owner/repo/issues/41) **config loader ignores `XDG_CONFIG_HOME`** — _kept (was 1)_
@@ -189,10 +194,6 @@ reason after a dash in italics:
 ### Decide
 
 - [#35](https://github.com/owner/repo/issues/35) looks answered: #50 made deletion opt-in. Close it, or move it to `Next`?
-
-### Unchanged
-
-- [#47](https://github.com/owner/repo/issues/47) — _a comment, no decision_
 ```
 
 **Before asking, check the proposal against the digest**, not against memory
