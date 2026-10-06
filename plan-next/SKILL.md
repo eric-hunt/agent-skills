@@ -3,7 +3,7 @@ name: plan-next
 description: Decide what comes next at the start of a phase — bring docs/ROADMAP.md up to date with the issue tracker since the roadmap was last touched, then put the order to the user. Use on the trunk after a merge, before starting new work, when asked what to work on next, or when review-boundary reports a stale roadmap. Proposes first; writes ROADMAP.md only once the user has agreed the order, and changes nothing in the tracker. Pairs with set-foundation, which lays down the tracking convention, and review-boundary, which checks the end of a phase.
 metadata:
   author: Eric Hunt
-  version: "1.5"
+  version: "1.6"
   summary: Start-of-phase planning — reconcile ROADMAP.md with the tracker, then agree what comes next
 license: MIT
 ---
@@ -156,22 +156,44 @@ not a backlog — but it is stated, not implied by silence; several left off for
 one reason can share a line. An updated issue that changed nothing goes under
 `unchanged`, so the count still adds up.
 
-```
-Next
-1. #41  config loader ignores XDG_CONFIG_HOME   kept (was 1)
-2. #38  sync --dry-run                          was 2
-   with #56  --dry-run missing from the README   new; #38's body adds the flag to the README's usage section
-3. #52  sync exits 0 on a partial failure       new bug, from the last review
-dropped   #44 — closed by #50
-left off  #55 — cosmetic; nothing waits on it
+The proposal is read rendered, so write it as markdown, not in a code fence,
+and do not lean on spacing: aligned columns collapse, and lines not in a list
+run together into one paragraph. Each list gets a heading, and what `Next`
+drops or leaves off goes under subheadings of its own; every line under a
+heading is a list item, and a rider is a nested item under its host.
+`Unchanged` comes first, out of the way, and `Decide` last, where the user
+acts on it. Link each issue number to its issue
+(`https://github.com/<tracker>/issues/<n>`, the digest's `tracker:` line;
+`owner/repo#N` links into that repository), bold its title, and put the
+reason after a dash in italics:
 
-Open questions
-- #53  should sync follow symlinks?             new
+```markdown
+### Unchanged
 
-Decide
-- #35 looks answered: #50 made deletion opt-in. Close it, or move it to Next?
+- [#47](https://github.com/owner/repo/issues/47) — _a comment, no decision_
 
-unchanged  #47 (a comment, no decision)
+### Next
+
+1. [#41](https://github.com/owner/repo/issues/41) **config loader ignores `XDG_CONFIG_HOME`** — _kept (was 1)_
+2. [#38](https://github.com/owner/repo/issues/38) **`sync --dry-run`** — _was 2_
+   - with [#56](https://github.com/owner/repo/issues/56) **`--dry-run` missing from the README** — _new; #38's body adds the flag to the README's usage section_
+3. [#52](https://github.com/owner/repo/issues/52) **sync exits 0 on a partial failure** — _new bug, from the last review_
+
+#### Dropped
+
+- [#44](https://github.com/owner/repo/issues/44) — _closed by #50_
+
+#### Left off
+
+- [#55](https://github.com/owner/repo/issues/55) — _cosmetic; nothing waits on it_
+
+### Open questions
+
+- [#53](https://github.com/owner/repo/issues/53) **should sync follow symlinks?** — _new_
+
+### Decide
+
+- [#35](https://github.com/owner/repo/issues/35) looks answered: #50 made deletion opt-in. Close it, or move it to `Next`?
 ```
 
 **Before asking, check the proposal against the digest**, not against memory
