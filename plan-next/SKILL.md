@@ -158,32 +158,41 @@ one reason can share a line. An updated issue that changed nothing goes under
 
 The proposal is read rendered, so write it as markdown, not in a code fence,
 and do not lean on spacing: aligned columns collapse, and lines not in a list
-run together into one paragraph. Every line is a list item; a rider is a
-nested item under its host. Link each issue number to its issue
+run together into one paragraph. Each list gets a heading, and what `Next`
+drops or leaves off goes under subheadings of its own; every line under a
+heading is a list item, and a rider is a nested item under its host. Link
+each issue number to its issue
 (`https://github.com/<tracker>/issues/<n>`, the digest's `tracker:` line;
 `owner/repo#N` links into that repository), bold its title, and put the
 reason after a dash in italics:
 
 ```markdown
-**Next**
+### Next
 
 1. [#41](https://github.com/owner/repo/issues/41) **config loader ignores `XDG_CONFIG_HOME`** — _kept (was 1)_
 2. [#38](https://github.com/owner/repo/issues/38) **`sync --dry-run`** — _was 2_
    - with [#56](https://github.com/owner/repo/issues/56) **`--dry-run` missing from the README** — _new; #38's body adds the flag to the README's usage section_
 3. [#52](https://github.com/owner/repo/issues/52) **sync exits 0 on a partial failure** — _new bug, from the last review_
 
-- **Dropped:** [#44](https://github.com/owner/repo/issues/44) — _closed by #50_
-- **Left off:** [#55](https://github.com/owner/repo/issues/55) — _cosmetic; nothing waits on it_
+#### Dropped
 
-**Open questions**
+- [#44](https://github.com/owner/repo/issues/44) — _closed by #50_
+
+#### Left off
+
+- [#55](https://github.com/owner/repo/issues/55) — _cosmetic; nothing waits on it_
+
+### Open questions
 
 - [#53](https://github.com/owner/repo/issues/53) **should sync follow symlinks?** — _new_
 
-**Decide**
+### Decide
 
 - [#35](https://github.com/owner/repo/issues/35) looks answered: #50 made deletion opt-in. Close it, or move it to `Next`?
 
-**Unchanged:** [#47](https://github.com/owner/repo/issues/47) — _a comment, no decision_
+### Unchanged
+
+- [#47](https://github.com/owner/repo/issues/47) — _a comment, no decision_
 ```
 
 **Before asking, check the proposal against the digest**, not against memory
